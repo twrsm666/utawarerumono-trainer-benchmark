@@ -1,64 +1,64 @@
-# Timeline
+# 时间线
 
-All timestamps are local time (`UTC+08:00`) as recorded by the agent platform, transcript event timestamps, or filesystem metadata.
+所有时间为本地时间（UTC+8），来源为平台记录、会话事件时间戳或文件系统元数据。
 
-## Hy4: 2026-11-08
+## Hy4：2026-11-08
 
-| Time | Event |
+| 时间 | 事件 |
 | --- | --- |
-| 16:38:36 | Session `Hy4` starts; first task prompt asks for a game trainer. |
-| 16:47:15 | Operator supplies the reverse-engineering handoff document. |
-| 17:18:44 | Operator adds the requirement for intuitive per-character pages. |
-| 17:42:14 | Operator reports that displayed values do not match the game. |
-| 18:00:35 | Final self-correction acknowledges static templates were mistaken for runtime character state. |
+| 16:38:36 | 会话 `Hy4` 开始；首个提示词要求制作游戏修改器 |
+| 16:47:15 | 操作者补充逆向交接文档 |
+| 17:18:44 | 操作者追加“按人物分页、直观可改”的要求 |
+| 17:42:14 | 操作者反馈显示数值与游戏不符 |
+| 18:00:35 | 最终自我修正：承认把静态模板当成了运行时角色状态 |
 
-Measured span: **81.97 minutes**. Result: Python/HTML source only; no standalone build.
+跨度 **81.97 分钟**。结果：只有 Python/HTML 源码，没有独立构建。
 
-Tool histogram: Bash 71, Edit 71, TaskUpdate 14, Write 8, TaskCreate 7, Read 4, DeferExecuteTool 3, present_files 3, ToolSearch 1. Total: **182 calls**.
+工具分布：Bash 71、Edit 71、TaskUpdate 14、Write 8、TaskCreate 7、Read 4、DeferExecuteTool 3、present_files 3、ToolSearch 1，合计 **182 次**。
 
-## K3.1: 2026-11-08
+## K3.1：2026-11-08
 
-| Time | Event |
+| 时间 | 事件 |
 | --- | --- |
-| 18:03:40 | First prompt includes the complete per-character requirement and handoff document. |
-| 18:33:45 | First one-file EXE generated. Elapsed: **30.09 min**. |
-| 18:37:02 | Operator reports typed values being overwritten before write. |
-| 18:40:42 | Fixed v1.1 EXE generated. Elapsed after report: **3.67 min**. |
-| 18:40:43 | Build completion event recorded. |
+| 18:03:40 | 首个提示词，已含完整分页要求与交接文档 |
+| 18:33:45 | 生成首个单文件 EXE，用时 **30.09 分钟** |
+| 18:37:02 | 操作者反馈：键入的数值在写入前被覆盖 |
+| 18:40:42 | 生成修复版 v1.1，距反馈 **3.67 分钟** |
+| 18:40:43 | 记录构建完成事件 |
 
-Measured initial-task span through the fixed build: **37.02 minutes**.
+从首个请求到修复版完成合计 **37.02 分钟**。
 
-Tool histogram inside the initial task window (ending 18:40:42): Bash 50, Edit 27, Write 8, Read 7, ViewImage 6, TaskUpdate 5, PowerShell 4, TaskCreate 3, TaskOutput 3, WebSearch 1, WebFetch 1, Grep 1, present_files 1. Total: **117 calls**.
+初始任务窗（截至 18:40:42）工具分布：Bash 50、Edit 27、Write 8、Read 7、ViewImage 6、TaskUpdate 5、PowerShell 4、TaskCreate 3、TaskOutput 3、WebSearch 1、WebFetch 1、Grep 1、present_files 1，合计 **117 次**。
 
-The first request and fixed-build timestamps are also corroborated by filesystem metadata from the platform file history.
+首个请求与修复版构建时间亦得到平台文件历史的文件系统元数据佐证。
 
-## Qwen4: 2026-11-11
+## Qwen4：2026-11-11
 
-The Qoder conversation transcript was not available to this audit. The timeline below comes from artifact filesystem timestamps in `dd671415/trainer`.
+本次审计未取得 Qoder 对话记录。以下时间线来自 `dd671415/trainer` 的文件系统时间戳。
 
-| Time | Event |
+| 时间 | 事件 |
 | --- | --- |
-| 20:33:07 | Save snapshots written; analysis workspace begins. |
-| 20:33:23 | Save analysis script produced. |
-| 20:41:48 | Character block analysis script produced. |
-| 21:06:01 | Character detail analysis script produced. |
-| 21:20:11 | Character map script produced. |
-| 21:25:55 | UI HTML last written. |
-| 21:28:09 | Save engine last written. |
-| 21:42:37 | Executable build script produced. |
-| 21:44:42 | Final 93.7 MB executable timestamp. |
+| 20:33:07 | 写入存档快照，分析工作区开始 |
+| 20:33:23 | 产出存档分析脚本 |
+| 20:41:48 | 产出角色块分析脚本 |
+| 21:06:01 | 产出角色明细分析脚本 |
+| 21:20:11 | 产出角色映射脚本 |
+| 21:25:55 | 最后一次写入界面 HTML |
+| 21:28:09 | 最后一次写入存档引擎 |
+| 21:42:37 | 产出可执行文件构建脚本 |
+| 21:44:42 | 93.7 MB 可执行文件最终时间戳 |
 
-Artifact window: **71.57 minutes**. The Qwen4 chat itself may have started earlier or ended later; this is an artifact-only lower-bound window, not a full conversation duration.
+产物时间窗 **71.57 分钟**。真实对话可能更早开始或更晚结束，因此这是产物层面的**下界**窗口，不是完整会话时长。
 
-## 2026-11-11: audit and restoration
+## 2026-11-11：审计与重建
 
-These events are not part of any model's original performance time.
+以下事件不计入任何模型的原始表现时间：
 
-- The K3.1 working tree was recovered from platform file history.
-- The final v1.1 source was rebuilt and ran the complete test suite against the running game.
-- Qwen4's save editor was queried read-only on localhost and compared with live game memory.
-- No save file was written by the audit.
+- 从平台文件历史恢复 K3.1 工作树；
+- 重建最终源码，并在运行中的游戏上跑完整测试；
+- 只读查询 Qwen4 的本地服务，与实机内存逐行对照；
+- 审计全程未写入任何存档。
 
-## Interpretation
+## 解读注意
 
-Elapsed time includes tool waits, dependency installation, screenshots, edits, retries, and human steering. It is not inference latency and should not be presented as a controlled throughput measurement.
+耗时为墙钟时间，包含工具等待、依赖安装、截图、编辑、重试与人工干预。它不是推理延迟，也不应被当作受控吞吐量测量。

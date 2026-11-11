@@ -1,27 +1,27 @@
-# Task materials
+# 任务材料
 
-## Contents
+## 内容
 
-- `benchmark-prompt.md` — the prompt variants recorded for the sessions.
-- `provided-handoff.md` — the reverse-engineering note supplied to the WorkBuddy sessions.
+- `benchmark-prompt.md` — 各会话记录的提示词版本。
+- `provided-handoff.md` — 提供给 WorkBuddy 会话的逆向交接笔记。
 
-## Provenance
+## 来源
 
-`provided-handoff.md` was authored before this benchmark and supplied by the operator. It is not a product of the evaluated agents. It is included to make the starting information auditable.
+`provided-handoff.md` 在本基准之前就已由操作者撰写并提供，不是被评测 Agent 的产物。把它放进来，是为了让“起点信息”也可被核查。
 
-## Sanitization
+## 脱敏
 
-Local paths and account identifiers were replaced:
+本机路径与账号标识已替换：
 
-| Original category | Replacement |
+| 原始类别 | 替换为 |
 | --- | --- |
-| Local user profile path | `<USER_HOME>` or `<USER_ID>` |
-| Local work/download root | `<WORK_ROOT>` |
-| Local toolchain directory | `<LOCAL_TOOLCHAIN>` |
-| Game installation directory | `<GAME_DIR>` |
+| 本机用户目录 | `<USER_HOME>` 或 `<USER_ID>` |
+| 本机工作／下载根目录 | `<WORK_ROOT>` |
+| 本机工具链目录 | `<LOCAL_TOOLCHAIN>` |
+| 游戏安装目录 | `<GAME_DIR>` |
 
-No game executable, archive, save, or third-party trainer is included.
+不包含任何游戏可执行文件、封包、存档或第三方修改器。
 
-## Important
+## 重要提示
 
-The handoff contains unverified hypotheses alongside measured facts. It must not be read as a specification that was guaranteed correct. In particular, its section 12 explicitly lists unsolved runtime character layout questions.
+交接笔记里既有实测事实，也有未经验证的假设，不能当作“保证正确的规格书”来读。其第 12 节明确列出了尚未解决的运行时角色布局问题。

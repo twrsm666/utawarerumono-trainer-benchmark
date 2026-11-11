@@ -1,6 +1,6 @@
-# Hy4 evidence
+# Hy4 证据
 
-- `final-response.md` — the agent's final self-correction, showing that static templates had been mistaken for runtime state.
-- `artifact-inventory.json` — file sizes and SHA-256 hashes for the seven source files delivered by the session.
+- `final-response.md` — Agent 最终的自我更正，说明它把静态模板误当成了运行时状态。
+- `artifact-inventory.json` — 该会话交付的 7 个源文件的大小与 SHA-256。
 
-No executable was produced. The sanitized source is in [../../artifacts/hy4/](../../artifacts/hy4/).
+没有产出可执行文件。脱敏源码见 [../../artifacts/hy4/](../../artifacts/hy4/)。

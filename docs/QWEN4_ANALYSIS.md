@@ -1,94 +1,94 @@
-# Qwen4 analysis: a one-slot character mapping error
+# Qwen4 分析：整体错位一个槽位的角色映射
 
-## Artifact under test
+## 被测产物
 
-- Session label: **Qwen4**
-- Platform: Qoder
-- Artifact directory: `2026-11-11/dd671415/trainer`
-- Product: Node.js local web UI plus a 93,733,376-byte Windows single executable
-- Original executable SHA-256: `4a6525a2c8657eb598cc18aa9b5ba5d005797ee428b9a55237b58427a3d2e4dd`
-- Save checksum check: valid
-- Public source snapshot: [artifacts/qwen4](../artifacts/qwen4/)
-- Runtime comparison: [evidence/qwen4/comparison.json](../evidence/qwen4/comparison.json)
+- 会话标签：**Qwen4**
+- 平台：Qoder
+- 产物目录：`2026-11-11/dd671415/trainer`
+- 形态：Node.js 本地网页界面 + 93,733,376 字节的 Windows 单文件程序
+- 原始可执行文件 SHA-256：`4a6525a2c8657eb598cc18aa9b5ba5d005797ee428b9a55237b58427a3d2e4dd`
+- 存档校验和：有效
+- 公开源码快照：[artifacts/qwen4](../artifacts/qwen4/)
+- 运行时对照：[evidence/qwen4/comparison.json](../evidence/qwen4/comparison.json)
 
-The executable is not redistributed. It embeds a local username path and is a save-file writer with a known bad mapping.
+原始可执行文件不直接公开：它内嵌操作者本机绝对路径，且是已知映射错误的存档写入器。发布的是用其自带构建脚本在中性路径下重建的版本（详见 [RELEASES.md](../RELEASES.md)），映射错误与原始版一致。
 
-## What the tool does
+## 它做了什么
 
-Qwen4 chose a save-file editor rather than live process editing. Its character parser is in `saveengine.js`:
+Qwen4 选择改存档文件，而不是改运行内存。角色解析在 `saveengine.js`：
 
 ```js
-const CHAR_BASE = 0xa4f8;      // character array start
-const CHAR_STRIDE = 0x278;     // record size
+const CHAR_BASE = 0xa4f8;      // 角色数组起点
+const CHAR_STRIDE = 0x278;     // 记录长度
 const CHAR_SLOTS = 24;
 
 const unitId = buf.readUInt32LE(off + 0x270);
-const level = buf.readUInt16LE(off);
-const hp = buf.readUInt32LE(off + 8);
+const level  = buf.readUInt16LE(off);
+const hp     = buf.readUInt32LE(off + 8);
 ```
 
-Field definitions map `level` to `+0x00`, `exp` to `+0x02`, `hp` to `+0x08`, `sp` to `+0x0C`, `atk` to `+0x10`, `def` to `+0x12`, `hit` to `+0x14`, `avoid` to `+0x16`, `move` to `+0x18`, and `jump` to `+0x1A`.
+字段表把 `level` 映射到 `+0x00`、`exp` 到 `+0x02`、`hp` 到 `+0x08`、`sp` 到 `+0x0C`、`atk` 到 `+0x10`、`def` 到 `+0x12`、`hit` 到 `+0x14`、`avoid` 到 `+0x16`、`move` 到 `+0x18`、`jump` 到 `+0x1A`。
 
-The checksum code and backup path are technically coherent: checksum verification returned `valid: true`, and the tool preserves the original save before an edit. Those facts do not validate the character semantics.
+校验和与备份在工程上是成立的：校验返回 `valid: true`，编辑前也会保留原始存档。但这些事实并不能证明角色语义正确。
 
-## Reproduction
+## 复现方式
 
-The game was running with the Qwen4 editor listening at `127.0.0.1:8765`. The audit:
+游戏运行时，Qwen4 的界面服务监听在 `127.0.0.1:8765`。审计步骤：
 
-1. Requested Qwen4's parsed save slot 10 with GET only.
-2. Read the live 18-slot character table with `ReadProcessMemory`.
-3. Compared each Qwen4 row to the same index and to the next index.
-4. Wrote no memory and no save file.
+1. 只用 GET 取回 Qwen4 解析的第 10 号存档槽；
+2. 用 `ReadProcessMemory` 读取实机 18 槽角色表；
+3. 把每一行与同索引、下一索引分别比对；
+4. 全程未写内存、未写存档。
 
-Script: [scripts/capture_runtime_comparison.py](../scripts/capture_runtime_comparison.py).
+脚本：[scripts/capture_runtime_comparison.py](../scripts/capture_runtime_comparison.py)。
 
-## Result
+## 结果
 
-| Metric | Result |
+| 指标 | 结果 |
 | --- | ---: |
-| Qwen4 character rows | 18 |
-| Qwen4 name matches actual same-slot character | **0 / 18** |
-| Qwen4 unit ID equals next slot's actual unit ID | **18 / 18** |
-| Level/EXP/ATK/DEF/MOVE/JUMP matches actual same slot | **108 / 108** |
-| Save checksum valid | yes |
+| Qwen4 角色行数 | 18 |
+| 名称与同槽位真实角色一致 | **0 / 18** |
+| 單位ID 等于下一槽位真实 ID | **18 / 18** |
+| 等级／经验／攻击／防御／移动／跳跃 与同槽位一致 | **108 / 108** |
+| 存档校验和有效 | 是 |
 
-In other words, the numeric data was not random. Qwen4 read Haku's progression and displayed it under Kuon's name; it read Kuon's progression and displayed it under Maroro's name, and so on through all 18 slots.
+换句话说，数值不是随机生成的：Qwen4 读到了哈克的成长数据，却把它显示在久远名下；读到久远的，显示在麻呂呂名下，18 个槽位依次错位。
 
-## Representative rows
+## 代表性行
 
-| Qwen4 page | Qwen4 level / EXP / ATK / DEF / MOVE / JUMP | Actual same-slot character | Actual values | Interpretation |
+| Qwen4 页面 | Qwen4 显示的 等级／经验／攻击／防御／移动／跳跃 | 同槽位真实角色 | 真实数值 | 解释 |
 | --- | --- | --- | --- | --- |
-| 久遠 | 14 / 68 / 24 / 23 / 4 / 1 | Haku | 14 / 68 / 24 / 23 / 4 / 1 | Haku's values under Kuon's name |
-| 麻呂呂 | 14 / 8 / 30 / 25 / 4 / 2 | Kuon | 14 / 8 / 30 / 25 / 4 / 2 | Kuon's values under Maroro's name |
-| 露露緹耶 | 5 / 30 / 24 / 15 / 3 / 1 | Maroro | 5 / 30 / 24 / 15 / 3 / 1 | Maroro's values under Rulutieh's name |
-| 哈克（最后一行） | 1 / 0 / 19 / 16 / 4 / 1 | Sasara (slot 17) | 1 / 0 / 19 / 16 / 4 / 1 | Sasara's values under Haku's name |
+| 久遠 | 14 / 68 / 24 / 23 / 4 / 1 | 哈克 | 14 / 68 / 24 / 23 / 4 / 1 | 哈克的数值挂在久远名下 |
+| 麻呂呂 | 14 / 8 / 30 / 25 / 4 / 2 | 久远 | 14 / 8 / 30 / 25 / 4 / 2 | 久远的数值挂在麻呂呂名下 |
+| 露露緹耶 | 5 / 30 / 24 / 15 / 3 / 1 | 麻呂呂 | 5 / 30 / 24 / 15 / 3 / 1 | 麻呂呂的数值挂在露露缇耶名下 |
+| 哈克（末行） | 1 / 0 / 19 / 16 / 4 / 1 | 萨萨拉（第 17 槽） | 1 / 0 / 19 / 16 / 4 / 1 | 萨萨拉的数值挂在哈克名下 |
 
-The full 18-row table is in [comparison.csv](../evidence/qwen4/comparison.csv).
+完整 18 行见 [comparison.csv](../evidence/qwen4/comparison.csv)。
 
-## Secondary semantic errors
+## 次要语义错误
 
-Even if the names were fixed, several labels would still be wrong:
+即使修好角色 ID，仍有若干字段名是错的：
 
-- Qwen4's `sp` at `+0x0C` equals the runtime max-HP value used in this test. For example, Qwen4 shows `SP=223` for the Haku row, while the live Haku `max_hp` is 223.
-- Qwen4's `hit` at `+0x14` equals runtime speed. The Haku row shows `hit=100`, and live Haku speed is 100.
-- Qwen4's `hp` at `+0x08` is not the runtime max-HP field used by the accepted tool (`+0x88`). This audit does not assert what that save field means.
+- `sp`（`+0x0C`）在本审计中等于运行时的“最大 HP”：例如哈克那行的 `SP=223`，而实机哈克 `max_hp=223`。
+- `hit`（`+0x14`）等于运行时速度：哈克那行 `hit=100`，实机哈克速度为 100。
+- `hp`（`+0x08`）并不是本任务采用的运行时最大 HP 字段（`+0x88`）。本审计不判定该存档字段的真实含义。
 
-The core failure is therefore not a single mistyped offset: the unit identity and several display labels form an inconsistent save-layout model.
+因此核心问题不是“某个偏移打错了一个字节”，而是單位身份与多个显示标签共同构成了一个错误的存档布局模型。
 
-## Why the checksum did not catch it
+## 为什么校验和没拦住
 
-A checksum validates file integrity, not semantics. Qwen4's computed checksum matched the header, so the file was structurally intact while the editor still associated the values with the wrong character IDs.
+校验和只保证文件完整，不保证语义正确。Qwen4 算出的校验和与文件头一致，所以文件在结构上是好的，编辑器却仍然把数值挂到了错误的角色 ID 上。
 
-## Why no write test was performed
+## 为什么没有做写入测试
 
-Qwen4 exposes a POST endpoint that rewrites the selected save and recomputes its checksum. Because the same-slot values were already assigned to the wrong character name, writing through the UI would modify another character's record under a misleading label. The audit stopped at read-only evidence.
+Qwen4 提供会重写存档并重算校验和的写入接口。由于同槽位数值已经被挂到错误角色名下，通过它的界面写入，会在误导性的名字下修改另一个角色的记录。审计因此在只读证据处停止。
 
-This is not a claim that every write would corrupt the file. It is a refusal to perform an unnecessary destructive test after a semantic mapping failure had been demonstrated.
+这不代表“任何写入都会损坏存档”。它只是表明：在语义映射已经被证伪之后，没有必要再做一次破坏性验证。
 
-## Rejected evidence
+## 被排除的证据
 
-Qwen4's `_analysis` directory contains extracted `NameTextData.bin`, `UnitTextData.bin`, disassembly, and save backups. Those are not published because they contain game-derived data, private save content, or both. Their presence and hashes are recorded in [artifact-inventory.json](../evidence/qwen4/artifact-inventory.json).
+Qwen4 的 `_analysis` 目录包含抽取出的 `NameTextData.bin`、`UnitTextData.bin`、反汇编结果与存档备份。这些内容含游戏数据、私人存档内容或两者兼有，因此不公开。其存在与哈希记录在 [artifact-inventory.json](../evidence/qwen4/artifact-inventory.json)。
 
-## Conclusion
+## 结论
 
-For the requested product, Qwen4's result is unusable for a precise reason: **the per-character pages map each character's real values to the next character's identity.** A user editing “Kuon” would actually be editing Haku's record. The UI looks complete, and the checksum is valid, but the character semantics are wrong.
+就所要求的产品而言，Qwen4 的结果不可用，原因很具体：**按人物分页的界面，把每个角色的真实数值挂到了下一个角色的身份上。** 用户点开“久遠”，改的其实是哈克的记录。界面完整、校验和有效，但角色语义是错的。

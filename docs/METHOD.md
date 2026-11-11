@@ -1,103 +1,98 @@
-# Method
+# 方法
 
-## 1. Research question
+## 1. 问题设定
 
-Can an agent produce a usable Windows trainer for a specific 32-bit single-player game, with one page per character and editable attributes that correspond to the running game?
+一个 Agent 能否为一款具体的 32 位单机游戏做出**可用**的 Windows 修改器：每个人物一个页面，属性可编辑，且数值对应正在运行的游戏？
 
-This is an acceptance-based case study. It asks whether each delivered artifact worked, not whether a model is generally better.
+这是**验收型个案研究**：只回答“交付物是否能用”，不回答“哪个模型更强”。
 
-## 2. Task inputs
+## 2. 任务输入
 
-- A legally installed PC build of *Utawarerumono: Mask of Deception*.
-- A 17 KB reverse-engineering handoff note supplied by the operator.
-- A written requirement for an intuitive per-character editor.
+- 合法安装的 PC 版《传颂之物：虚伪的假面》。
+- 操作者提供的 17 KB 逆向交接文档（RTTI 类名、存档布局线索、PE 信息、未解问题）。
+- 一条明确的“直观的按人物分页修改器”需求。
 
-The full K3.1 prompt included the per-character requirement from the beginning. The Hy4 session began with a shorter prompt and received the per-character requirement 40 minutes later. The Qwen4 conversation record was not available; only its session label and artifacts could be audited. These differences are material and are disclosed in [LIMITATIONS.md](LIMITATIONS.md).
+三次会话的输入并不完全相同：K3.1 在首个提示词里就拿到了完整分页要求；Hy4 起步时只有较短的任务描述，分页要求约 40 分钟后才补上；Qwen4 的原始对话记录未能取得，只能审计其产物。这个差异是实质性的，已在[限制说明](LIMITATIONS.md)中披露。
 
-## 3. Session attribution
+## 3. 会话归属
 
-| Label | Platform | Evidence of identity | What can be verified |
+| 标签 | 平台 | 身份线索 | 可核验范围 |
 | --- | --- | --- | --- |
-| Hy4 | WorkBuddy | Session title/custom title `Hy4`; metadata at export reports `kimi-k3.1-pro` | Session events, source tree, timestamps |
-| K3.1 | WorkBuddy | Session title/custom title `K3.1`; current metadata after fallback reports `deepseek-v4.1-flash` | Events, file history, builds, source, executable |
-| Qwen4 | Qoder | Operator-supplied session label; artifact directory `dd671415` | Files, timestamps, source, parser output |
+| Hy4 | WorkBuddy | 会话标题 `Hy4`；导出时会话元数据为 `kimi-k3.1-pro` | 会话事件、源码树、时间戳 |
+| K3.1 | WorkBuddy | 会话标题 `K3.1`；发生回退后元数据为 `deepseek-v4.1-flash` | 事件、文件历史、构建、源码、可执行文件 |
+| Qwen4 | Qoder | 操作者提供的会话标签；产物目录 `dd671415` | 文件、时间戳、源码、解析输出 |
 
-A session title is not a provider-issued model identity. Where the operator's attribution and metadata differ or cannot be reconciled, both are reported.
+会话标题不是服务商签发的模型身份。凡是操作者归属与元数据不一致或无法对齐之处，两者并列记录。
 
-## 4. Timing definition
+## 4. 计时口径
 
-Times are wall-clock timestamps in the operator's local timezone (`UTC+08:00`). They include model inference, tool execution, package installation, screenshots, tests, retries, and human steering. They are not per-token latency or pure generation time.
+时间为操作者本地时区（UTC+8）的墙钟时间，包含模型推理、工具执行、依赖安装、截图、测试、重试与人工干预，**不是**每 token 延迟，也不是纯生成时间。
 
-Artifact timestamps are filesystem `mtime`/`ctime`. Conversation timestamps come from the local JSONL event stream. All retain millisecond precision where available.
+产物时间取文件系统 `mtime`/`ctime`；会话时间取本地 JSONL 事件流，均保留毫秒精度（有则保留）。
 
-## 5. Acceptance contract
+## 5. 验收契约
 
-An artifact passes only if all applicable checks pass.
+只有全部适用项都通过，产物才算通过。判定为通过／不通过，不设加权分数。
 
-| ID | Check | Operational test |
+| 编号 | 检查项 | 操作化测试 |
 | --- | --- | --- |
-| A1 | Stable artifact | The delivered program starts without an IDE or agent session. |
-| A2 | Per-character pages | There is a direct entry point for every supported character; no manual memory scan is required to reach a named page. |
-| A3 | Correct identity | Displayed character IDs/names resolve to the same character in the running game. |
-| A4 | Correct values | Displayed level, experience, HP-related fields, ATK, DEF, SPD, MOVE, and JUMP correspond to the same character in the running game. |
-| A5 | Faithful writes | A changed value is read back from the target, remains after a short delay, and can be restored. |
-| A6 | Safe boundaries | The tool does not modify the game executable or unrelated files without an explicit user action. |
-| A7 | Usable packaging | A standalone executable exists and passes a launch/read smoke test. |
+| A1 | 产物可独立运行 | 脱离 IDE 与会话环境即可启动 |
+| A2 | 按人物分页 | 每个人物都有直达入口，不需要手动扫描内存才能到达命名页面 |
+| A3 | 身份正确 | 显示的角色 ID／名称与运行中游戏是同一个角色 |
+| A4 | 数值正确 | 等级、经验、HP 相关字段、攻击、防御、速度、移动、跳跃属于同一角色 |
+| A5 | 写入可信 | 改值后能从目标回读、短暂延时后仍在、可还原 |
+| A6 | 边界安全 | 未经用户明确操作，不修改游戏 exe 或无关文件 |
+| A7 | 打包可用 | 存在独立可执行文件，并通启动／读取冒烟测试 |
 
-The checks are pass/fail. No weighted score is invented.
+## 6. 证据采集
 
-## 6. Evidence collection
+### WorkBuddy 两次会话
 
-### WorkBuddy sessions
+只读解析本地 JSONL 事件流，统计：
 
-Local JSONL event streams were parsed read-only. The audit counted:
+- 人工输入轮次（排除自动化任务通知）；
+- 助手消息数；
+- 按工具名聚合的调用次数；
+- 首末时间戳与墙钟时长。
 
-- human turns, excluding automated task notifications;
-- assistant messages;
-- tool calls by tool name;
-- first and last timestamps;
-- wall-clock duration.
+最终源码从平台文件历史中恢复，复制入仓、脱敏、重建、重新测试。发布的二进制即为 2026-11-11 用该恢复源码构建的结果。
 
-Final source versions were recovered from the platform's file-history records, copied to the repository, sanitized, rebuilt, and retested. The final accepted binary was produced from that recovered source on 2026-11-11.
+### Qwen4 产物
 
-### Qwen4 artifact
+只读盘点产物目录并计算哈希；在游戏运行中只用 GET 请求查询其本地服务；把它的存档解析结果与 `ReadProcessMemory` 的实机角色表快照逐行对比。
 
-The artifact directory was inventoried read-only. Files were hashed. Qwen4's local server was queried with GET-only endpoints while the game was running. Its parsed slot-10 output was compared to a read-only `ReadProcessMemory` snapshot of the live character table.
+审计期间没有调用它的写入接口，也没有修改任何存档。对照脚本见 [scripts/capture_runtime_comparison.py](../scripts/capture_runtime_comparison.py)。
 
-No Qwen4 write endpoint was called and no save file was modified during the audit. The comparison script is [scripts/capture_runtime_comparison.py](../scripts/capture_runtime_comparison.py).
+### 主动排除的材料
 
-### Rejected material
+- 游戏本体、封包、贴图、音频、文本及任何抽取出的游戏数据；
+- `.DAT` 存档与存档备份；
+- 第三方修改器或 Cheat Engine 表；
+- 含无关隐私与本机身份信息的原始会话全文；
+- Qwen4 原始 EXE（内嵌本机绝对路径，且是已知映射错误的存档写入器）。
 
-The following were deliberately excluded from publication:
+产物的大小与哈希在不泄露内容的前提下保留。
 
-- game executable, archives, textures, audio, text, and extracted game data;
-- `.DAT` save files and save backups;
-- third-party trainer binaries or cheat tables;
-- raw agent transcripts containing unrelated private context and local identity;
-- Qwen4's generated executable, which embeds a local absolute path and is a defective save writer.
+## 7. Qwen4 的运行时对照方法
 
-Original artifact hashes and sizes are retained where they do not expose file contents.
+对 Qwen4 返回的 18 行，逐行：
 
-## 7. Runtime comparison method for Qwen4
+1. 与该**同索引**的实机角色比对身份；
+2. 与**下一索引**的实机角色比对，以检验“整体错位一槽”的假设；
+3. 比对六个数值字段：等级、经验、攻击、防御、移动、跳跃；
+4. 结果写入 [evidence/qwen4/comparison.json](../evidence/qwen4/comparison.json)。
 
-For each of the 18 rows returned by Qwen4:
+这样可以区分三种不同性质的失败：
 
-1. Compare the row's declared unit ID/name with the live character in the **same index**.
-2. Compare the same row with the **next index** to test the observed one-slot rotation.
-3. Compare six numeric fields: level, experience, attack, defense, move, jump.
-4. Record matches in [evidence/qwen4/comparison.json](../evidence/qwen4/comparison.json).
+- 数值随机或凭空生成；
+- 数值正确但归属了错误的角色；
+- 仅仅是 UI 显示名称有问题。
 
-This distinguishes three different failure modes:
+证据显示是第二种：数值属于同一槽位，ID／名称被整体旋转到了下一槽。
 
-- random or fabricated numeric data;
-- correct data assigned to the wrong character;
-- a UI-only naming defect.
+## 8. 复现边界
 
-The evidence shows the second mode: numeric data belongs to the same slot, while IDs/names are rotated to the next slot.
-
-## 8. Reproduction boundaries
-
-- Same game build required: PE MD5 `c02107b577a8e3be7965b5b50594abfc`.
-- Same live process name required: `Utawarerumono Mask of Deception.exe`.
-- Results may differ with another game build, language package, save state, process bitness, or modified executable.
-- The accepted trainer uses a validated static table address for this exact build and refuses connection if its character-table checks fail.
+- 必须是同一游戏版本：PE MD5 `c02107b577a8e3be7965b5b50594abfc`。
+- 必须是同一进程名：`Utawarerumono Mask of Deception.exe`。
+- 换游戏版本、语言包、存档状态、进程位数或改动过的可执行文件，结果都可能不同。
+- 通过验收的修改器使用本版本验证过的静态角色表地址，连接时若角色表校验不通过会拒绝写入。

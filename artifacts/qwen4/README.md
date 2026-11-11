@@ -1,32 +1,32 @@
-# Qwen4 rejected save editor
+# Qwen4：被拒绝的存档修改器
 
-Status: **rejected for the requested product.**
+状态：**就所要求的产品而言未通过验收。**
 
-> Do not use this source snapshot on a real save file. Its character-to-ID mapping is demonstrably wrong. The original executable is intentionally not redistributed.
+> 不要用这份源码处理真实存档。它的角色到 ID 的映射已被证明错误。原始可执行文件不直接公开。
 
-## Why it is here
+## 为什么保留它
 
-The source is retained to make the failure reproducible and reviewable. It implements:
+保留源码是为了让失败可复现、可审阅。它实现了：
 
-- save-header checksum verification and recomputation;
-- character-row parsing;
-- a local web UI;
-- save backup and restore;
-- single-executable packaging.
+- 存档头校验和的验证与重算；
+- 角色行解析；
+- 本地网页界面；
+- 存档备份与还原；
+- 单文件打包。
 
-## What failed
+## 失败在哪里
 
-The same-slot numeric data is correct, but every character ID/name is taken from the next slot:
+同槽位的数值是对的，但每个角色的 ID／名称都取自下一槽位：
 
-- 0/18 names match the actual same-slot character;
-- 18/18 IDs equal the next slot's ID;
-- 108/108 sampled numeric fields belong to the same slot.
+- 0/18 名称与同槽位真实角色一致；
+- 18/18 的 ID 等于下一槽位的 ID；
+- 108/108 抽样数值属于同一槽位。
 
-The result is a polished editor that changes the wrong character's values under a familiar name. See [../../docs/QWEN4_ANALYSIS.md](../../docs/QWEN4_ANALYSIS.md).
+结果是一个看起来完整、却会在熟悉的名字下改到另一个角色数值的编辑器。详见 [../../docs/QWEN4_ANALYSIS.md](../../docs/QWEN4_ANALYSIS.md)。
 
-## Snapshot contents
+## 快照内容
 
-`save-editor-source/` contains the product source files:
+`save-editor-source/` 为产品源码：
 
 - `saveengine.js`
 - `server.js`
@@ -38,21 +38,31 @@ The result is a polished editor that changes the wrong character's values under 
 - `ui-index.html`
 - `启动修改器.bat`
 
-The following were deliberately excluded:
+以下内容被有意排除：
 
-- save files and save backups;
-- extracted `NameTextData.bin`, `UnitTextData.bin`, and game data;
-- analysis disassembly dumps;
-- `trainer.blob`;
-- the 93,733,376-byte executable, which embeds a local user path.
+- 存档文件与存档备份；
+- 抽取出的 `NameTextData.bin`、`UnitTextData.bin` 与游戏数据；
+- 分析用反汇编转储；
+- `trainer.blob`；
+- 93,733,376 字节的原始可执行文件（内嵌本机用户路径）。
 
-## Sanitization
+## 脱敏
 
-The source snapshot replaces local paths with `<USER_HOME>`. It is not runnable in place until a tester supplies a local save directory. The original artifact inventory and hashes are in [../../evidence/qwen4/artifact-inventory.json](../../evidence/qwen4/artifact-inventory.json).
+源码快照把本机路径替换为 `<USER_HOME>`。在测试者自行提供存档目录前，它不能就地运行。原始产物清单与哈希见 [../../evidence/qwen4/artifact-inventory.json](../../evidence/qwen4/artifact-inventory.json)。
 
-## Original executable
+## 原始可执行文件
 
-- Size: 93,733,376 bytes
-- SHA-256: `4a6525a2c8657eb598cc18aa9b5ba5d005797ee428b9a55237b58427a3d2e4dd`
+- 大小：93,733,376 字节
+- SHA-256：`4a6525a2c8657eb598cc18aa9b5ba5d005797ee428b9a55237b58427a3d2e4dd`
 
-The binary is withheld for privacy and safety, not because it is unavailable to the operator.
+不公开是出于隐私与安全考虑，而非操作者拿不到该文件。
+
+## 公开的重建版
+
+为便于复现其错误表现，Release 中附带了用其自带构建脚本在中性路径下重建的单文件程序：
+
+- 文件名：`qwen4-save-editor-rebuilt.exe`
+- 大小：87,227,904 字节
+- SHA-256：`f01ce4fc20e557175e04f7bb17a554ad2c002065ef9e520299e144b898478460`
+
+它仍会写存档且映射仍然错误，仅用于复核。

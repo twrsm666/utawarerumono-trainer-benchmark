@@ -1,33 +1,33 @@
-# Security and safe use
+# 安全与使用边界
 
-## Scope
+## 范围
 
-This repository documents a local, single-player game trainer and a benchmark of agent sessions. It is not a service and has no server component exposed to the internet.
+本仓库记录的是一个本地单机游戏修改器和一次 Agent 会话评测。它不是一个服务，也没有对外暴露的服务端组件。
 
-## Do not use rejected tools on valuable data
+## 不要用被拒绝的工具处理重要数据
 
-The Qwen4 source snapshot is archived for audit only. Its character mapping is known to be wrong. Do not run it against a real save file.
+Qwen4 的源码快照仅供审计。它的角色映射已知错误，**不要拿它修改真实存档**。
 
-The Hy4 snapshot is historical and not part of the accepted build. It has not been revalidated for destructive behavior.
+Hy4 的快照是历史产物，不属于通过验收的构建，其破坏性行为也未被重新验证。
 
-## Accepted trainer
+## 通过验收的修改器
 
-The accepted trainer:
+它只会：
 
-- attaches to one named local process;
-- reads and writes process memory;
-- does not modify the game executable;
-- does not modify save files;
-- validates the known character table and target character before writing;
-- reads back each write;
-- exposes explicit locking so game-recomputed values can be held.
+- 附加到一个指定名称的本地进程；
+- 读写该进程内存；
+- 不修改游戏可执行文件；
+- 不修改存档文件；
+- 写入前校验已知角色表与目标角色；
+- 每次写入后回读；
+- 提供显式锁定，用于应对游戏自动重算的数值。
 
-Back up your save before using any third-party trainer, even when the trainer does not write save files.
+即便如此，使用任何第三方修改器前都建议先备份存档。
 
-## Credentials
+## 凭证
 
-There are no API keys, GitHub tokens, passwords, session cookies, or other credentials in this repository. A publication token included in a private planning transcript was deliberately excluded and should be revoked by the operator.
+本仓库不含任何 API Key、GitHub 令牌、密码、会话 Cookie 或其他凭证。出现在私人规划记录中的发布令牌已被有意排除，操作者应尽快吊销并重新生成。
 
-## Reporting
+## 上报
 
-If you find sensitive data, a game file, or a credential in the repository, open a private security advisory or contact the repository owner rather than posting it publicly.
+如果你在仓库中发现敏感数据、游戏文件或凭证，请通过私有安全通告或直接联系仓库所有者，不要在公开区张贴。

@@ -1,113 +1,124 @@
-# Results
+# 结果
 
-## Summary
+## 总览
 
-| Run | Wall clock | Human turns | Tool calls | Delivered | Verdict |
+| 会话 | 墙钟 | 人工输入 | 工具调用 | 交付物 | 判定 |
 | --- | ---: | ---: | ---: | --- | --- |
-| Hy4 | 81.97 min | 4 | 182 | 7-file Python/HTML source, no EXE | Fail |
-| K3.1 | 30.09 min to first EXE; 3.67 min fix | 3 in the initial task window | 117 in the initial task window | Rebuilt Windows EXE, source, tests | Pass |
-| Qwen4 | 71.57 min artifact window | Unknown | Unknown | 93.7 MB save editor EXE, source | Fail on identity mapping |
+| Hy4 | 81.97 分钟 | 4 | 182 | 7 个 Python/HTML 源文件，无 EXE | 未通过 |
+| K3.1 | 30.09 分钟出首个 EXE；3.67 分钟修复 | 初始任务窗内 3 | 初始任务窗内 117 | Windows EXE、源码、测试 | 通过 |
+| Qwen4 | 71.57 分钟（产物时间窗） | 未知 | 未知 | 93.7 MB 存档修改器 EXE、源码 | 身份映射失败 |
 
-Machine-readable metrics: [session-metrics.json](../evidence/session-metrics.json).
+机器可读指标：[session-metrics.json](../evidence/session-metrics.json)。
+
+---
 
 ## Hy4
 
-### Delivered
+### 交付物
 
-- `utawa_trainer.py` (47,018 bytes)
-- `unit_table.py` (8,293 bytes)
-- `index.html` (65,266 bytes)
-- `verify_checksum.py` (1,618 bytes)
-- launch scripts and README
+| 文件 | 字节 |
+| --- | ---: |
+| `utawa_trainer.py` | 47,018 |
+| `index.html` | 65,266 |
+| `README.md` | 11,779 |
+| `unit_table.py` | 8,293 |
+| `verify_checksum.py` | 1,618 |
+| `启动修改器.bat` | 458 |
+| `start.bat` | 210 |
 
-No `.exe`, installer, or single-command build path was delivered.
+没有 `.exe`、安装器，也没有能产出独立程序的构建脚本。源码见 [artifacts/hy4](../artifacts/hy4/)。
 
-### Acceptance
+### 验收
 
-| Check | Result | Evidence |
+| 检查项 | 结果 | 依据 |
 | --- | :---: | --- |
-| A1 standalone executable | FAIL | no executable in artifact tree |
-| A2 per-character pages | FAIL | final product requires a manual value-change scan/filter workflow |
-| A3 correct identity | FAIL | final reply admits template values were presented as runtime character state |
-| A4 correct values | FAIL | final reply: values do not match the game |
-| A5 faithful writes | Not accepted | no reliable fixed character object was established |
-| A6 safe boundaries | Uncontested | source is non-destructive by design |
-| A7 packaging | FAIL | no executable |
+| A1 独立可运行 | 失败 | 产物树内没有任何可执行文件 |
+| A2 按人物分页 | 失败 | 最终改为“手动改值 + 扫描筛选”流程 |
+| A3 身份正确 | 失败 | 最终回复承认把模板值当成运行时角色状态 |
+| A4 数值正确 | 失败 | 最终回复承认数值与游戏不符 |
+| A5 写入可信 | 未受理 | 从未建立稳定的角色对象 |
+| A6 边界安全 | 无争议 | 源码设计上不自毁数据，但含存档写入路径 |
+| A7 打包可用 | 失败 | 无构建产物 |
 
-### Technical conclusion
+### 技术结论
 
-Hy4 found and packaged static `UnitData.bin` data, then treated it as runtime state. After user feedback, it replaced named fixed pages with a live scanner that requires the user to change a value in game and filter candidates. That is a different product and still not the requested direct per-character editor.
+Hy4 定位并封装了静态 `UnitData.bin` 的数据，然后把它当成了运行时状态。被指出后，它用“实时扫描器”替换了具名固定页面：要求用户在游戏里改一个数值、扫描候选、再回游戏改、再筛选，最后人工猜测周边字段含义。这是另一种产品，且仍然无法做到“每个人物一个页面”。
 
-Hy4's own final response is preserved at [evidence/hy4/final-response.md](../evidence/hy4/final-response.md).
+其最终回复原文见 [evidence/hy4/final-response.md](../evidence/hy4/final-response.md)。
+
+---
 
 ## K3.1
 
-### Delivered
+### 交付物
 
-- Windows one-file executable (`k31-trainer-v1.1.exe`).
-- Source for process attachment, character parsing, UI, write verification, locks, tests, and packaging.
-- 18 character pages.
-- 13 editable fields per page.
+- Windows 单文件可执行程序 `k31-trainer-v1.1.exe`。
+- 进程附加、角色解析、界面、写入校验、锁定、测试与打包的完整源码。
+- 18 个人物页面，每页 13 项可编辑字段。
 
-### Acceptance
+### 验收
 
-| Check | Result | Evidence |
+| 检查项 | 结果 | 依据 |
 | --- | :---: | --- |
-| A1 standalone executable | PASS | packaged self-test exit 0 |
-| A2 per-character pages | PASS | 18 pages, 13 fields each |
-| A3 correct identity | PASS | expected unit-ID sequence matched 18/18 |
-| A4 correct values | PASS | read-only runtime snapshot matched the accepted build's field layout |
-| A5 faithful writes | PASS | BP `31 → 32 → 31`; read-back verification after each write |
-| A6 safe boundaries | PASS | no game file or save-file writes; memory only |
-| A7 packaging | PASS | `status=OK`, `pages=18`, `fields=13` |
+| A1 独立可运行 | 通过 | 打包程序自检退出码 0 |
+| A2 按人物分页 | 通过 | 18 页，每页 13 项 |
+| A3 身份正确 | 通过 | 期望的角色 ID 序列 18/18 命中 |
+| A4 数值正确 | 通过 | 只读运行时快照与字段布局一致 |
+| A5 写入可信 | 通过 | BP `31 → 32 → 31`，每次写入后回读 |
+| A6 边界安全 | 通过 | 不写游戏文件、不写存档，仅进程内存 |
+| A7 打包可用 | 通过 | `status=OK`、`pages=18`、`fields=13` |
 
-The first build had a real UI defect: a 1.5 s automatic refresh could overwrite typed input before the spin box committed it. The final version removes automatic refresh, marks text edits immediately, preserves focused/dirty rows, and supports Enter-to-write. See [K31_ACCEPTANCE.md](K31_ACCEPTANCE.md).
+首版存在一个真实的界面缺陷：1.5 秒自动刷新会在数值框提交前覆盖键入内容。最终版取消自动刷新、键入即标记待写入、刷新跳过焦点／待写入／锁定行，并支持回车写入。详见 [K3.1 验收记录](K31_ACCEPTANCE.md)。
 
-### Technical conclusion
+### 技术结论
 
-The accepted tool reads a stable, validated character table at module base + `0x6CE4A4`. It uses a record stride of `0x278`, verifies character ID and team before each write, and reads back every written field. The Windows executable passed an independent launch and read smoke test.
+通过验收的工具读取模块基址 + `0x6CE4A4` 的稳定角色表，记录步长 `0x278`，每次写入前校验角色 ID 与阵营，写入后回读每个字段。打包后的 EXE 通过了独立的启动与读取冒烟测试。
+
+---
 
 ## Qwen4
 
-### Delivered
+### 交付物
 
-- A 93,733,376-byte Node single-executable save editor.
-- JavaScript implementation of save checksum, character parsing, edit UI, backup, and restore.
-- Nine product files and a large analysis workspace.
+- 93,733,376 字节的 Node 单文件存档修改器。
+- 存档校验和、角色解析、编辑界面、备份与还原的 JavaScript 实现。
+- 9 个产品文件，以及一个规模很大的分析目录。
 
-### Acceptance
+### 验收
 
-| Check | Result | Evidence |
+| 检查项 | 结果 | 依据 |
 | --- | :---: | --- |
-| A1 standalone executable | PASS | executable exists; process started |
-| A2 per-character pages | PARTIAL | 18 rows exist, but page identity is wrong |
-| A3 correct identity | FAIL | 0/18 names match their same-slot character; 18/18 IDs equal the next slot's ID |
-| A4 correct values | FAIL for user intent | 108/108 sampled numeric fields match the same slot but are shown under the next character's name; several field labels are also wrong |
-| A5 faithful writes | NOT TESTED | not safe to write a real save after identity mapping failed |
-| A6 safe boundaries | PARTIAL | backup exists, but semantic corruption is possible |
-| A7 packaging | PASS | standalone EXE produced |
+| A1 独立可运行 | 通过 | 可执行文件存在且进程可启动 |
+| A2 按人物分页 | 部分通过 | 有 18 行，但页面身份是错的 |
+| A3 身份正确 | 失败 | 0/18 名称与同槽位角色一致；18/18 ID 等于下一槽位 |
+| A4 数值正确 | 对用户意图失败 | 108/108 抽样数值属于同一槽位，却显示在下一个角色名下；多个字段标签也不对 |
+| A5 写入可信 | 未测试 | 身份映射已失败，不再对真实存档做破坏性验证 |
+| A6 边界安全 | 部分通过 | 有备份，但语义层面仍可能写错对象 |
+| A7 打包可用 | 通过 | 产出了独立 EXE |
 
-### What looked correct
+### 看起来正确的部分
 
-- Save checksum validation returned `valid: true`.
-- The editor produced 18 rows.
-- Six core numeric fields matched the live game state by slot.
+- 存档校验和校验返回 `valid: true`。
+- 编辑器确实生成了 18 行。
+- 六个核心数值字段按槽位与实机状态一致。
 
-### What made it unusable
+### 使其不可用的原因
 
-- Every row's unit ID was taken from the wrong location and rotated one slot.
-- Thus, a user opening "Kuon" saw Haku's level, EXP, ATK, DEF, MOVE, and JUMP.
-- `SP` matched the runtime max-HP field; `Hit` matched runtime speed. The labels do not describe the values.
-- Because the user edits by character name, writing through this UI would apply values to the wrong save record.
+- 每行的單位ID取自错误位置，整体旋转了一个槽位。
+- 因此打开“久遠”看到的是哈克的等级、经验、攻击、防御、移动、跳跃。
+- `sp` 对应运行时“最大 HP”字段，`hit` 对应运行时“速度”字段，标签与数值含义不符。
+- 用户是按角色名编辑的，通过这个界面写入会把数值写到错误角色的记录上。
 
-Detailed numbers: [QWEN4_ANALYSIS.md](QWEN4_ANALYSIS.md).
+详细数字见 [Qwen4 分析](QWEN4_ANALYSIS.md)。
 
-## Cross-case conclusion
+---
 
-For this single task and acceptance contract:
+## 跨案例结论
 
-- Hy4 spent the longest and did not deliver a stable named-character editor.
-- The K3.1-labeled session delivered a working executable in about 30 minutes, followed by a small input-handling fix.
-- Qwen4 delivered a polished-looking save editor whose character-to-data mapping is systematically wrong.
+就这一任务与这份验收契约而言：
 
-This ordering is **not** a general capability ranking. The runs had different prompts, tool availability, human steering, and model fallback conditions.
+- Hy4 花的时间最长，却没有交付稳定的具名角色编辑器。
+- K3.1 约 30 分钟交付可运行程序，随后用 3.67 分钟修掉输入缺陷。
+- Qwen4 交付了外观完整的存档编辑器，但角色到数据的映射系统性错误。
+
+这个排序**不是**通用能力排名：三次运行的提示词、工具可用性、人工介入与回退情况都不同。

@@ -1,81 +1,79 @@
-# Limitations and interpretation guardrails
+# 限制与解读边界
 
-## 1. This is not a model leaderboard
+## 1. 这不是模型排行榜
 
-The study contains one task, one machine, one game build, one save environment, and one operator. It cannot establish general coding, reasoning, or reverse-engineering ability. The result is an acceptance record for this artifact.
+本研究只有一个任务、一台机器、一个游戏版本、一种存档环境、一位操作者。它无法证明通用的编码、推理或逆向能力。结果只是这份产物的验收记录。
 
-## 2. Session labels are not certified model IDs
+## 2. 会话标签不等于认证的模型 ID
 
-- **Hy4** is a WorkBuddy session title. The session metadata available at export reports `kimi-k3.1-pro`.
-- **K3.1** is a WorkBuddy session title. The operator attributes the initial build to K3.1 and the final small fix to DeepSeek. The live session metadata at export reports `deepseek-v4.1-flash` after fallback.
-- **Qwen4** is an operator-supplied Qoder session label. Its chat transcript was not available to the audit.
+- **Hy4** 是 WorkBuddy 的会话标题；导出时可见的元数据为 `kimi-k3.1-pro`。
+- **K3.1** 是 WorkBuddy 的会话标题；操作者把首个构建归给 K3.1，把最后的小修复归给 DeepSeek；发生回退后，会话元数据为 `deepseek-v4.1-flash`。
+- **Qwen4** 是操作者提供的 Qoder 会话标签；其对话记录未能取得。
 
-Provider-side model routing, revision, quantization, and fallback conditions are not independently verified. Report labels, not universal model claims.
+服务商侧的路由、版本、量化与回退条件都未经独立验证。请引用“标签”，不要引申为对模型的普遍结论。
 
-## 3. The prompts were not identical
+## 3. 提示词并不相同
 
-- K3.1 received the complete per-character requirement in its first prompt.
-- Hy4 started with a shorter request. The explicit per-character requirement arrived 40 minutes later, after substantial work had already been done.
-- Qwen4's original prompt was not available with the artifact.
+- K3.1 的首个提示词就包含完整的按人物分页要求。
+- Hy4 起步时只有较短的任务描述，明确的分页要求约 40 分钟后才到，那时已完成大量工作。
+- Qwen4 的原始提示词无法随产物取得。
 
-This asymmetry materially affects any head-to-head interpretation.
+这种不对称会实质性影响任何“正面对比”的解读。
 
-## 4. Tooling and human steering differed
+## 4. 工具与人工介入不同
 
-The sessions had different tools, web-search access, package availability, UI automation, screenshots, and human interventions. The K3.1 window includes a dependency download that took several minutes. Timing is not inference latency.
+三次会话的工具集、联网检索、依赖可用性、界面自动化、截图能力与人工干预都不一样。K3.1 的时间窗内还包含数分钟的依赖下载。计时不是推理延迟。
 
-## 5. The handoff document reduced difficulty
+## 5. 交接文档降低了难度
 
-The operator supplied a reverse-engineering handoff containing RTTI class names, save layout notes, PE details, and open questions. This is not a from-scratch reverse-engineering task.
+操作者提供了包含 RTTI 类名、存档布局线索、PE 信息与待解问题的逆向交接文档。这不是从零开始的逆向任务。
 
-The accepted run also used public research to locate a community field map, then validated the final memory layout independently. No third-party code, binary, or cheat table is redistributed.
+通过验收的那次运行还借助公开资料定位到社区字段表，然后独立验证了最终内存布局。仓库不再分发任何第三方代码、二进制或 Cheat Engine 表。
 
-## 6. Artifact timestamps are not full conversation times
+## 6. 产物时间戳不是完整会话时长
 
-The Qwen4 duration is computed from the first and last artifact writes. The chat may have started earlier or continued later. Qwen4's human-turn count and tool-call count are unknown.
+Qwen4 的时长由其最早与最晚的产物写入时间计算，对话可能更早开始或更晚结束；其人工轮次与工具调用次数均未知。
 
-## 7. The accepted build is version-specific
+## 7. 通过验收的构建绑定特定版本
 
-The trainer validates one game executable by MD5 and character-table shape. It is not claimed to work with a different patch, language build, executable revision, anti-cheat layer, or 64-bit remaster.
+修改器用 MD5 与角色表形状校验一个特定游戏可执行文件。不声称适用于其他补丁、语言版本、可执行文件修订、反作弊层或 64 位重制版。
 
-## 8. Testing was targeted, not exhaustive
+## 8. 测试是定向的，不是穷举的
 
-The accepted build was tested for:
+通过验收的构建验证了：
 
-- process attachment;
-- 18-page load;
-- character field layout;
-- one real BP write/read/restore;
-- UI input preservation;
-- packaged launch/read.
+- 进程附加；
+- 18 页加载；
+- 角色字段布局；
+- 一次真实的 BP 写入／回读／还原；
+- 界面输入的保留；
+- 打包后的启动与读取。
 
-It was not exhaustively tested through every story chapter, every battle transition, every menu, every save slot, or every possible stat combination. Save-file editing is outside its scope.
+它没有遍历每个剧情章节、每场战斗切换、每个菜单、每个存档槽或所有属性组合。存档文件编辑不在其范围内。
 
-## 9. Rebuilt binary provenance
+## 9. 重建版的来源
 
-The original final source was deleted in a later cleanup. It was recovered from the agent platform's file history and rebuilt on 2026-11-11. The release binary is validated by the tests in this repository, but it is not claimed to be byte-identical to the deleted original. Source-file versions and timestamps are documented in [K31_ACCEPTANCE.md](K31_ACCEPTANCE.md).
+原始最终源码在后来的清理中被删除，随后从平台文件历史恢复，并于 2026-11-11 重建。发布二进制由本仓库的测试验证，但不声称与被删除的原始二进制逐字节相同。源文件版本与时间戳记录在 [K3.1 验收记录](K31_ACCEPTANCE.md)。
 
-## 10. Qwen4 was not write-tested
+## 10. Qwen4 未做写入测试
 
-The save editor exposes a write endpoint, but no real save was modified during the audit. The mapping failure was already demonstrated with read-only evidence. This avoids an unnecessary destructive test.
+该存档编辑器提供写入接口，但审计期间没有修改任何真实存档：只读证据已经证明映射错误，无需再做破坏性验证。
 
-## 11. Raw logs are withheld
+## 11. 原始日志未公开
 
-Publishing raw logs would expose unrelated private conversations, local usernames, absolute paths, and authentication material. Counts, timestamps, source, tests, and focused excerpts are published instead. This necessarily limits independent verification of conversational details.
+公开原始日志会泄露无关的私人对话、本机用户名、绝对路径与认证材料。因此改为公开计数、时间戳、源码、测试与聚焦片段。这必然限制了对话细节的独立核验。
 
-## 12. No game assets
+## 12. 不含任何游戏资源
 
-No game executable, archive, save, texture, text, audio, or third-party trainer is included. Reproduction requires the user to own and install the correct game build.
+仓库不包含游戏可执行文件、封包、存档、贴图、文本、音频或第三方修改器。复现需要自行拥有并安装对应版本的游戏。
 
-## 13. Correct interpretation
+## 13. 合理的结论
 
-Reasonable conclusion:
+> 就这一具体任务与这份验收契约而言，标为 K3.1 的交付物是唯一提供了可用的、按人物分页的实时编辑器；Hy4 没有交付所要求的稳定编辑器；Qwen4 的编辑器系统性地把角色数据挂到了错误的名字下。
 
-> For this specific task and acceptance contract, the K3.1-labeled deliverable was the only one that provided a working per-character live editor. Hy4 did not deliver the requested stable editor, and Qwen4's editor systematically assigned character data to the wrong names.
+不合理的结论包括：
 
-Unreasonable conclusions include:
-
-- "Model X is always better than model Y."
-- "Hy4/Qwen4 cannot write code."
-- "The timing is a controlled inference benchmark."
-- "The accepted trainer works on every game version."
+- “模型 X 永远强于模型 Y”；
+- “Hy4／Qwen4 不会写代码”；
+- “这些时间是受控的推理基准”；
+- “通过验收的修改器适用于所有游戏版本”。

@@ -1,32 +1,33 @@
-# Evidence and publication policy
+# 证据与公开政策
 
-## Goals
+## 目标
 
-1. Preserve enough evidence for another engineer to challenge the conclusions.
-2. Avoid publishing unrelated private data, credentials, game assets, or save files.
-3. Distinguish measured facts from operator attribution and inference.
+1. 保留足够证据，让其他工程师可以质疑本档案的结论。
+2. 不公开无关隐私、凭证、游戏资源与存档文件。
+3. 把“实测事实”与“操作者归属／推断”分开写。
 
-## Published
+## 公开的内容
 
-- Session titles/labels, timestamps, wall-clock durations.
-- Counts of human turns, assistant messages, and tool calls.
-- Sanitized source snapshots.
-- The accepted standalone executable, attached to a GitHub Release rather than committed to Git.
-- Read-only runtime snapshots and field comparisons.
-- Checksums and artifact sizes.
-- Focused excerpts of the evaluated agents' own conclusions.
+- 会话标题／标签、时间戳、墙钟时长。
+- 人工轮次、助手消息数、工具调用次数。
+- 脱敏后的源码快照。
+- 通过验收的独立可执行文件（放在 GitHub Release，而不是提交进 Git）。
+- 只读运行时快照与字段对照。
+- 校验和与产物大小。
+- 被评测 Agent 自身结论的聚焦摘录。
+- 实机截图（经过检查，不含任务栏、桌面水印、通知与本机路径）。
 
-## Withheld
+## 不公开的内容
 
-- Raw agent conversations. They contain unrelated private context and local account identifiers.
-- The user's `.DAT` save files and all save backups.
-- The game executable, data archives, textures, text, and extracted data.
-- Third-party trainer binaries and Cheat Engine tables used only as research references.
-- The Qwen4 executable. It embeds a local user path and is a save writer with a defective mapping.
+- 原始会话全文：含无关私人上下文与本机账号标识。
+- 用户的 `.DAT` 存档及所有存档备份。
+- 游戏可执行文件、数据封包、贴图、文本与抽取出的数据。
+- 仅作研究参考的第三方修改器与 Cheat Engine 表。
+- Qwen4 的原始可执行文件：内嵌本机用户路径，且是映射错误的存档写入器。仓库改为发布其**中性路径重建版**，并记录两个版本的哈希。
 
-## Sanitization
+## 脱敏
 
-Local identities and directories were replaced with:
+本机身份与目录替换为：
 
 - `<USER_HOME>`
 - `<USER_ID>`
@@ -34,33 +35,43 @@ Local identities and directories were replaced with:
 - `<WORK_ROOT>`
 - `<LOCAL_TOOLCHAIN>`
 
-The replacements are textual. Sanitized historical code is not claimed to run without restoring local paths.
+替换是文本级的：脱敏后的历史代码不声称可以在不还原路径的情况下直接运行。
 
-## Checksums
+## 截图
 
-Where a withheld artifact is relevant, its size and SHA-256 are published in an inventory JSON. This proves what was evaluated without redistributing it.
+截图必须来自真实运行状态，且：
 
-## Recorded measurements vs. interpretation
+- 不出现任务栏、桌面水印、通知中心、浏览器标签等无关界面元素；
+- 不出现本机用户名或绝对路径；
+- 不出现他人信息。
 
-Measured:
+因此界面图采用窗口级抓取；若某界面会把路径直接渲染在页面上（例如 Qwen4 的侧栏），则先把运行目录换成中性路径再重新截图，而不是打码掩盖。
 
-- event counts and timestamps;
-- file sizes and hashes;
-- runtime character values;
-- Qwen4 mapping counts;
-- test and self-test outputs.
+## 校验和
 
-Operator attribution:
+对被保留但不公开的产物，其大小与 SHA-256 记录在清单 JSON 中。这样既能证明“确实评测过这个东西”，又不必再分发它。
 
-- which model produced which session;
-- the claim that a quota forced a model switch.
+## 实测与解读的分界
 
-The repository labels these separately and does not upgrade attribution into fact.
+实测：
 
-## No cherry-picked failed outputs
+- 事件计数与时间戳；
+- 文件大小与哈希；
+- 运行时角色数值；
+- Qwen4 的映射命中率；
+- 测试与自检输出。
 
-Failed runs are included with their source and own explanations. The accepted run's own bug (v1.0 auto-refresh overwrite) is also included and dated. Removing either would reduce the value of the evidence.
+操作者归属：
 
-## Rights
+- 哪次会话由哪个模型产生；
+- “限额导致切换模型”的说法。
 
-No game assets are included. The repository is a technical audit of user-generated tooling. Character names and game references remain the property of their respective rights holders.
+仓库把两者分列，不把归属升级为事实。
+
+## 不裁剪失败样本
+
+失败的运行连同其源码与自我解释一起公开；通过验收的那次运行自身的缺陷（v1.0 自动刷新覆盖输入）也一并公开并标明时间。删掉任何一侧，证据价值都会下降。
+
+## 权利
+
+不包含任何游戏资源。本仓库是对用户自建工具的技术审计；角色名称与游戏相关内容归各自权利人所有。

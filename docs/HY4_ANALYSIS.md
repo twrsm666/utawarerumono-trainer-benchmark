@@ -1,21 +1,21 @@
-# Hy4 analysis: static data mistaken for runtime state
+# Hy4 分析：把静态数据当成了运行时状态
 
-## Scope
+## 概况
 
-- Session label: **Hy4**
-- Platform: WorkBuddy
-- Session metadata at export: `kimi-k3.1-pro`
-- Active window: `2026-11-08 16:38:36` to `18:00:35` (`UTC+08:00`)
-- Wall clock: **81.97 minutes**
-- Human turns: 4
-- Tool calls: 182
-- Output: 7-file Python/HTML source tree, no executable
+- 会话标签：**Hy4**
+- 平台：WorkBuddy
+- 导出时的会话元数据：`kimi-k3.1-pro`
+- 活动窗口：2026-11-08 16:38:36 至 18:00:35（UTC+8）
+- 墙钟：**81.97 分钟**
+- 人工输入：4 轮
+- 工具调用：182 次
+- 产物：7 个 Python/HTML 源文件，无独立可执行程序
 
-The session title is the operator-provided label. The model metadata is reported as observed, not independently certified.
+会话标题是操作者提供的标签；模型元数据按观察记录，未经独立认证。
 
-## What was delivered
+## 交付了什么
 
-| File | Bytes |
+| 文件 | 字节 |
 | --- | ---: |
 | `utawa_trainer.py` | 47,018 |
 | `index.html` | 65,266 |
@@ -25,53 +25,53 @@ The session title is the operator-provided label. The model metadata is reported
 | `启动修改器.bat` | 458 |
 | `start.bat` | 210 |
 
-There is no `.exe`, installer, or build script that produces a standalone deliverable. The archived source is in [artifacts/hy4](../artifacts/hy4/). Local paths were replaced with `<USER_HOME>`, `<GAME_DIR>`, and `<WORK_ROOT>`.
+没有 `.exe`、没有安装器，也没有能产出独立交付物的构建脚本。归档源码见 [artifacts/hy4](../artifacts/hy4/)，本机路径已替换为 `<USER_HOME>`、`<GAME_DIR>`、`<WORK_ROOT>`。
 
-## Why it failed the requested product
+## 为什么没有满足产品要求
 
-The original requirement was an intuitive per-character editor. Hy4 initially built pages from `UnitData.bin`, a static game data table, rather than the live character records.
+原始要求是“直观的按人物编辑”。Hy4 最初用静态游戏数据表 `UnitData.bin` 生成人物页面，而不是运行中的角色记录。
 
-Its own final response states:
+它自己的最终回复写道：
 
-> I gave you `300 / 600 / 100 / 60…` from `UnitData.bin`; those are static template parameters, not Haku's state in the current battle. I treated the data-table template as a runtime character object, and the HP/attack/defense labels were also guesses.
+> 我给你的 `300 / 600 / 100 / 60…` 来自 `UnitData.bin`，那是静态模板参数，不是哈克在当前战斗里的状态。我把数据表模板当成了运行时角色对象，连 HP／攻击／防御的标签也是猜的。
 
-After the operator reported the mismatch, Hy4 changed the default page to a manual live scanner:
+在操作者指出不符后，Hy4 把默认页面改成了手动实时扫描器：
 
-1. Enter a value visible in the game.
-2. Scan memory for candidates.
-3. Change the value in game.
-4. Filter again.
-5. Inspect ambiguous surrounding fields and guess what changed.
+1. 输入一个游戏里能看到的数值；
+2. 扫描内存候选；
+3. 回游戏改动该数值；
+4. 再次筛选；
+5. 查看周边字段，猜测哪些值发生了变化。
 
-That workflow requires user-driven dynamic analysis and still does not provide a stable page per character. It is a materially different deliverable.
+这个流程把动态分析的工作交给了用户，而且仍然给不出“每个人物一个稳定页面”。它已经是另一种交付物。
 
-The final response is archived verbatim at [evidence/hy4/final-response.md](../evidence/hy4/final-response.md).
+最终回复原文存档于 [evidence/hy4/final-response.md](../evidence/hy4/final-response.md)。
 
-## Acceptance
+## 验收
 
-| Check | Result |
+| 检查项 | 结果 |
 | --- | --- |
-| Standalone executable | Fail: none delivered |
-| Direct per-character pages | Fail: replaced by manual scanning |
-| Correct character identity | Fail: static templates assigned to named characters |
-| Correct live values | Fail, acknowledged by the agent |
-| Faithful writes | Not accepted: no stable per-character object established |
-| Safe boundaries | Source is read/write to memory and backup-oriented save editing |
-| Packaging | Fail: no packaged build |
+| 独立可执行程序 | 失败：没有交付 |
+| 按人物直达页面 | 失败：被手动扫描取代 |
+| 角色身份正确 | 失败：把静态模板分配给具名角色 |
+| 运行时数值正确 | 失败，Agent 自认 |
+| 写入可信 | 未受理：从未建立稳定的角色对象 |
+| 边界安全 | 源码同时含内存读写与面向备份的存档编辑 |
+| 打包可用 | 失败：没有打包产物 |
 
-## Technical work that was valid
+## 有效的技术工作
 
-Hy4's artifact includes useful reverse-engineering notes:
+产物里包含有价值的逆向笔记：
 
-- save-header A-field checksum analysis;
-- `UnitData.bin` and `UnitTextData.bin` container parsing;
-- runtime location of the static unit-data table;
-- an explicit distinction between static templates and live state after correction.
+- 存档头部 A 字段校验和的分析；
+- `UnitData.bin`、`UnitTextData.bin` 容器格式的解析；
+- 静态单位数据表在运行时的位置；
+- 被纠正后对“静态模板”与“实时状态”的明确区分。
 
-Those findings are not enough to satisfy the product requirement. They are preserved because removing failed work would make the comparison less useful.
+这些发现不足以满足产品要求，但保留它们能让对照更有意义——如果只留下成功者的代码，这份档案就失去了取证价值。
 
-## Interpretation
+## 解读
 
-Hy4 spent 81.97 minutes and made many tool calls, but did not deliver the requested usable per-character editor. The failure was not a lack of UI polish; it was a data-model error: static templates were treated as current character state, and the correction moved away from the requested direct editor.
+Hy4 花了 81.97 分钟、做了大量工具调用，却没有交付所要求的可用编辑器。失败不在界面打磨，而在数据模型：把静态模板当成当前角色状态；被指出后又转向了手动扫描，偏离了“固定页面”的需求。
 
-This single result does not establish a general capability ranking. The session also received the explicit per-character requirement later than K3.1 did. That prompt difference is disclosed in [LIMITATIONS.md](LIMITATIONS.md).
+这一次结果不构成通用能力排名。该会话拿到明确分页要求的时间比 K3.1 晚了约 40 分钟，这一提示词差异已在[限制说明](LIMITATIONS.md)中披露。

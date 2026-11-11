@@ -1,169 +1,174 @@
-# K3.1 acceptance record
+# K3.1 验收记录
 
-## Scope
+## 范围
 
-This document records the accepted implementation and the independent rebuild performed for publication. "Accepted" means it satisfies this task's acceptance contract, not that it is universally correct for every build or save state.
+本文记录通过验收的实现，以及为公开发布所做的独立重建。“通过验收”指满足本任务的验收契约，不代表对任意游戏版本、任意存档状态都正确。
 
-## Environment
+## 环境
 
-| Item | Value |
+| 项目 | 值 |
 | --- | --- |
-| OS | Windows 11, build 10.0.26200 |
-| Python | 3.13.14, 64-bit |
-| UI | PySide6 6.12.0 |
-| Packager | PyInstaller 6.22.3 |
-| Game | `Utawarerumono Mask of Deception.exe` |
-| Game PE | 32-bit, 6,130,176 bytes |
-| Game MD5 | `c02107b577a8e3be7965b5b50594abfc` |
-| Output | `k31-trainer-v1.1.exe`, one-file Windows GUI |
-| Rebuilt release SHA-256 | `fc56b3ca386e4823b0fe32ec11b3a957611ac3f094e592bdfaeea666380573da` |
+| 系统 | Windows 11 10.0.26200 |
+| Python | 3.13.14，64 位 |
+| 界面 | PySide6 6.12.0 |
+| 打包 | PyInstaller 6.22.3 |
+| 游戏 | `Utawarerumono Mask of Deception.exe` |
+| 游戏 PE | 32 位，6,130,176 字节 |
+| 游戏 MD5 | `c02107b577a8e3be7965b5b50594abfc` |
+| 产物 | `k31-trainer-v1.1.exe`，单文件 GUI |
+| 重建版 SHA-256 | `fc56b3ca386e4823b0fe32ec11b3a957611ac3f094e592bdfaeea666380573da` |
 
-## Runtime model
+## 运行时模型
 
-The accepted tool reads a stable character table from the running 32-bit process:
+工具从运行中的 32 位进程读取稳定角色表：
 
-- Character table RVA: `0x6CE4A4`
-- Record stride: `0x278`
-- Core player slots: 18; reserved player/guest slots are scanned up to 30
-- Team field: `+0x12C` (`1` for player side)
+- 角色表 RVA：`0x6CE4A4`
+- 记录步长：`0x278`
+- 核心角色槽位：18；预留给客串角色的槽位扫描至 30
+- 阵营字段：`+0x12C`（玩家方为 `1`）
 
-Verified field offsets:
+已验证的字段偏移：
 
-| Field | Offset | Type |
-| --- | ---: | --- |
-| Unit ID | `0x74` | u16 |
-| Level | `0x7C` | u16 |
-| Current EXP | `0x7E` | u16 |
-| Max zeal | `0x80` | u32 |
-| Total EXP | `0x84` | u32 |
-| Max HP | `0x88` | u32 |
-| ATK | `0x8C` | u16 |
-| DEF | `0x8E` | u16 |
-| SPD | `0x90` | u16 |
-| MOVE | `0x94` | u16 |
-| JUMP | `0x96` | u16 |
-| BP | `0xA8` | u16 |
-| Current HP | `0xB8` | u32 |
-| Current zeal | `0xBC` | u32 |
+| 字段 | 偏移 | 类型 | 口径说明 |
+| --- | ---: | --- | --- |
+| 單位ID | `0x74` | u16 | |
+| 等级 | `0x7C` | u16 | |
+| 当前经验 | `0x7E` | u16 | |
+| 最大气力 | `0x80` | u32 | |
+| 累计经验 | `0x84` | u32 | |
+| 基础最大 HP | `0x88` | u32 | **不含装备加成** |
+| 攻击 | `0x8C` | u16 | |
+| 防御 | `0x8E` | u16 | |
+| 速度 | `0x90` | u16 | |
+| 移动 | `0x94` | u16 | |
+| 跳跃 | `0x96` | u16 | |
+| BP | `0xA8` | u16 | |
+| 当前 HP | `0xB8` | u32 | 等于“基础 + 装备”的有效上限（满血时） |
+| 当前气力 | `0xBC` | u32 | |
 
-The tool verifies the known unit-ID sequence at connection time. It also rereads each character's unit ID and team before every write, then reads back every written value.
+连接时校验已知角色 ID 序列；每次写入前重新读取该角色的 ID 与阵营；写入后回读全部写入字段。
 
-## UI behavior
+### 关于“最大 HP 与游戏面板不一致”
 
-- One direct page per character.
-- 13 editable fields per page.
-- Per-row write, whole-page write, per-row lock, heal-all, and all-BP shortcuts.
-- No automatic refresh during editing.
-- Typed text is marked dirty immediately.
-- Enter writes the current field.
-- Lock writes the selected value every 500 ms.
+这是字段口径差异，不是读取错误。实机核对：
 
-## Defect found in v1.0
+| 角色 | 基础最大 HP（`0x88`） | 装备加成 | 游戏面板显示 | 当前 HP（`0xB8`） |
+| --- | ---: | ---: | ---: | ---: |
+| 哈克 | 223 | +110 | 333 | 333 |
+| 久远 | 236 | +100 | 336 | 336 |
+| 露露缇耶 | 319 | +100 | 419 | 419 |
+| 麻呂呂 | 83 | 0 | 83 | 83 |
 
-The first packaged build used a 1.5 s UI refresh. `QSpinBox` had keyboard tracking disabled, so typed text that had not yet been committed did not emit `valueChanged`; the refresh replaced it with the old value.
+修改该字段改的是基础值，游戏会在其上叠加装备加成。界面把它标为“最大 HP”，实际含义是“基础最大 HP”——这是本版本已知的措辞不精确之处。
 
-Timeline:
+## 界面行为
 
-- First EXE: 18:33:45.
-- User report: 18:37:02.
-- Fixed EXE: 18:40:42.
-- Fix time: 3.67 minutes.
+- 每个人物一个直达页面。
+- 每页 13 项可编辑字段。
+- 支持单行写入、整页写入、单行锁定、全员回血、全员 BP。
+- 编辑期间不做自动刷新。
+- 键入即标记为待写入。
+- 回车写入当前字段。
+- 勾选锁定后每 500 ms 写入一次。
 
-Fix:
+## v1.0 的缺陷与修复
 
-- Removed the automatic refresh timer.
-- Bound `QLineEdit.textEdited` to mark a field dirty immediately.
-- Skipped refresh for focused, dirty, or locked fields.
-- Called `interpretText()` before writing.
-- Added Enter-to-write.
-- Kept a manual refresh button that still preserves pending edits.
+首个打包版本带 1.5 秒自动刷新，而 `QSpinBox` 关闭了键盘跟踪，未提交的键入文本不会触发 `valueChanged`，刷新随即用旧值覆盖了它。
 
-This defect is included because omitting it would make the acceptance record less credible. It was real, reproduced, fixed, and retested.
+时间线：
 
-## Automated checks
+- 首个 EXE：18:33:45
+- 用户反馈：18:37:02
+- 修复版 EXE：18:40:42
+- 修复耗时：3.67 分钟
 
-### Structural tests
+修复方式：
 
-Command:
+- 移除自动刷新计时器；
+- 绑定 `QLineEdit.textEdited`，键入即刻标记待写入；
+- 刷新时跳过获得焦点、待写入、已锁定的行；
+- 写入前调用 `interpretText()` 提交输入；
+- 增加回车写入；
+- 保留手动刷新按钮，且手动刷新同样不会覆盖未写入的编辑。
+
+保留这段缺陷记录，是因为删掉它会让验收记录失去可信度：它真实存在、被复现、被修复，并被重新测试。
+
+## 自动化检查
+
+### 结构测试
 
 ```powershell
 python -m unittest discover -s tests -p "test_core.py" -v
 ```
 
-Result: **5/5 passed**, including live process attachment, character-table parse, field bounds, and expected roster order.
+结果：**5/5 通过**，覆盖进程附加、角色表解析、字段边界与角色顺序。
 
-### UI smoke test
-
-Command:
+### 界面冒烟测试
 
 ```powershell
 python tests/ui_smoke_test.py
 ```
 
-Result:
+结果：
 
 ```text
 UI_TEST_OK pages=18 fields=13
 ```
 
-The test reproduces the important editing case: type `300` without committing, trigger refresh, and verify the text remains `300`; then verify the entered value can be committed.
+该测试复现了关键编辑场景：键入 `300` 但不提交，触发刷新，确认文本仍为 `300`，再确认可正常提交。
 
-### Live write/read/restore
-
-Command:
+### 实机写入／回读／还原
 
 ```powershell
 python tests/live_write_test.py
 ```
 
-Observed during the publication audit:
+发布审计时的实际输出：
 
 ```text
 LIVE_WRITE_OK name=哈克 original_bp=31 test_bp=32 restored_bp=31
 ```
 
-This is a real process write followed by a read-back, then a separate restore.
+这是一次真实的进程写入，随后回读，再独立还原。
 
-### Packaged executable
-
-Command:
+### 打包程序
 
 ```powershell
 k31-trainer-v1.1.exe --self-test
 ```
 
-Observed:
+实际输出：
 
 ```text
 status=OK
 pages=18
 fields=13
-pid=<current game process>
+pid=<当前游戏进程>
 ```
 
-Screenshot: [ui.png](../evidence/k31/ui.png). Raw smoke output: [evidence/k31/packaged-smoke](../evidence/k31/packaged-smoke/).
+截图：[docs/assets/k31-running.png](assets/k31-running.png)；游戏内对照：[docs/assets/k31-game-truth.png](assets/k31-game-truth.png)；自检原始输出：[evidence/k31/packaged-smoke](../evidence/k31/packaged-smoke/)。
 
-## Provenance and rebuild
+## 来源与重建
 
-The working tree was deleted during an earlier cleanup. Final source versions were recovered from the agent platform's file-history store:
+早期清理过程中工作树被删除。最终源码从平台文件历史中恢复：
 
-- `app.py` v5, 30,413 bytes
-- `game_memory.py` v2, 15,079 bytes
-- `build.py` v3, 3,817 bytes
-- tests and `tools/recon.py`
+- `app.py` v5，30,413 字节
+- `game_memory.py` v2，15,079 字节
+- `build.py` v3，3,817 字节
+- 测试与 `tools/recon.py`
 
-Those files were copied into [artifacts/k31/trainer-source](../artifacts/k31/trainer-source/), compiled, tested against the running game, and packaged into the release asset on 2026-11-11. The release is therefore a **reproducible rebuild**. It is not claimed to be byte-identical to the deleted 2026-11-08 binary.
+这些文件被复制进 [artifacts/k31/trainer-source](../artifacts/k31/trainer-source/)，编译、对运行中的游戏重新测试，并于 2026-11-11 打包为发布资产。因此发布的是**可复现的重建版**，不声称与 2026-11-08 被删除的二进制逐字节相同。
 
-The superseded v1.0 binary is not published. Its SHA-256 is recorded in the artifact checksums for provenance.
+被取代的 v1.0 二进制不公开，其 SHA-256 记录在产物校验清单中，用于溯源。
 
-## Attachments and third-party material
+## 附件与第三方材料
 
-The accepted tool does not include any game executable, archive, texture, save file, third-party binary, or cheat table. A public community Cheat Engine table was used during research to identify field candidates; its code is not redistributed. The final implementation reads and writes the live process directly.
+通过验收的工具不包含任何游戏可执行文件、封包、贴图、存档、第三方二进制或 Cheat Engine 表。研究阶段曾使用一份公开社区 Cheat Engine 表来定位字段候选，其代码未被再分发；最终实现直接读写运行中的进程。
 
-## Remaining limits
+## 剩余限制
 
-- Only the exact game build above was validated.
-- Only the tested save and battle-independent character table state were exercised.
-- The `+0x88` field is the base max-HP field used by the accepted model. The game can derive a larger effective maximum from upgrades or equipment, so current HP may exceed this base value. The UI labels the field “max HP”; it is not a complete derived-stat calculator.
-- It does not claim that every field persists through every menu or battle transition; the UI provides locks for values the game recomputes.
-- It writes process memory only. It does not edit the game executable or save files.
+- 仅在本文件所列的游戏版本上验证。
+- 仅对受测存档与战斗外的角色表状态做过验证。
+- `+0x88` 是基础最大 HP；游戏会叠加装备或强化得到更高的有效上限，因此当前 HP 可能高于该值。界面标为“最大 HP”，但它不是完整的派生属性计算器。
+- 不声称所有字段都能穿过每一次菜单切换或战斗结算；对会被游戏重算的项，界面提供锁定。
+- 仅写进程内存，不修改游戏可执行文件，不修改存档文件。

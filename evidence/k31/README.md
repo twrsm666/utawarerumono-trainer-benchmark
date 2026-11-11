@@ -1,7 +1,8 @@
-# K3.1 evidence
+# K3.1 证据
 
-- `ui.png` — native Windows screenshot of the accepted UI, captured during the audit.
-- `test-results.txt` — parser, live attach, UI input preservation, and live BP write/restore results.
-- `packaged-smoke/` — raw status output from the released executable's `--self-test`.
+- `ui.png` — 审计期间抓取的修改器窗口截图（Windows 原生渲染）。
+- `test-results.txt` — 解析、实机附加、界面输入保留、实机 BP 写入／还原的结果。
+- `packaged-smoke/` — 发布版 `--self-test` 的原始状态输出。
+- 运行截图与游戏内对照见 [../../docs/assets/](../../docs/assets/)。
 
-The live tests ran against the game process identified by the exact PE MD5 in the top-level README. Character names and levels are shown solely to prove that the parsed table matches the running game; no save file is published. The screenshot is a UI capture of a live process, not a redistributed save state.
+实机测试针对顶层 README 中指定 PE MD5 的游戏进程运行。截图中出现角色名与等级，仅用于证明解析出的角色表与运行中的游戏一致；不公开任何存档。截图为实时进程的界面抓取，不是被再分发的存档状态。
