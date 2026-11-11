@@ -1,6 +1,6 @@
 # K3.1 evidence
 
-- `ui.png` — native Windows screenshot captured by the packaged self-test.
+- `ui.png` — native Windows screenshot of the accepted UI, captured during the audit.
 - `test-results.txt` — parser, live attach, UI input preservation, and live BP write/restore results.
 - `packaged-smoke/` — raw status output from the released executable's `--self-test`.
 
