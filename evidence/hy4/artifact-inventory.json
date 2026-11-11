@@ -1,0 +1,41 @@
+{
+  "session": "Hy4",
+  "artifact_dir": "2026-11-08-16-38-36/utawa-trainer",
+  "files": [
+    {
+      "path": "README.md",
+      "size": 11779,
+      "sha256": "1df2aaf5177068fcb2d9faeb93f662debb93f01bfbfe3a8838a739861d6391b2"
+    },
+    {
+      "path": "start.bat",
+      "size": 210,
+      "sha256": "41f4ffd4b13d77e9eb789ee2af0417d90926ec78f363f1c33271ace80fa59ad0"
+    },
+    {
+      "path": "unit_table.py",
+      "size": 8293,
+      "sha256": "fccad2122562183d7566e58831ff531b4ce6547aa117fafaa509518b7bf2231c"
+    },
+    {
+      "path": "utawa_trainer.py",
+      "size": 47018,
+      "sha256": "80e6c7d3d7c99e06da5cc501f4954853e974b100c9bb77666cbee491e62e1acb"
+    },
+    {
+      "path": "verify_checksum.py",
+      "size": 1618,
+      "sha256": "81795dbc6055a55987ad0c64a855bb5d64416836b9907083f76620e825e10b25"
+    },
+    {
+      "path": "web\\index.html",
+      "size": 65266,
+      "sha256": "35458d55e873e6a39e0e24b2f025dd24c65a6f714875b5fe277ed467c670fbc9"
+    },
+    {
+      "path": "启动修改器.bat",
+      "size": 458,
+      "sha256": "9c7341b0d7feef6d94c6242a1c0450e025de3b0f8e3837146e22cb4989e9ba08"
+    }
+  ]
+}

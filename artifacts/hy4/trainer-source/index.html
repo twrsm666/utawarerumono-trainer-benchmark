@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>虚伪的假面 · 单机修改器</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --panel-2:#fbfaf8; --line:#e4e0d9;
+  --ink:#26241f; --ink-2:#6d675e; --ink-3:#a09a90;
+  --accent:#a8402f; --accent-soft:#f6e9e6; --accent-2:#8a6a3f;
+  --ok:#3d7a55; --ok-soft:#e8f3ec; --warn:#9a6b12; --warn-soft:#fbf2dc;
+  --danger:#b3261e; --danger-soft:#fbeae8;
+  --mono:"Cascadia Mono","Consolas","SFMono-Regular","Menlo",monospace;
+  --sans:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --shadow:0 1px 2px rgba(30,25,18,.05),0 6px 20px rgba(30,25,18,.04);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+
+.wrap{max-width:1280px;margin:0 auto;padding:0 22px 60px}
+header{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.hd{max-width:1280px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand h1{font-size:18px;margin:0;letter-spacing:.02em;font-weight:650}
+.brand small{color:var(--ink-3);font-size:12px;letter-spacing:.06em}
+.status{margin-left:auto;display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ink-3);margin-right:6px}
+.dot.on{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.pill{background:var(--panel-2);border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-family:var(--mono);font-size:11.5px}
+
+nav{max-width:1280px;margin:0 auto;padding:0 22px;display:flex;gap:2px}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:11px 18px;color:var(--ink-2);font-weight:550}
+nav button:hover{color:var(--ink)}
+nav button.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.page{display:none;padding-top:22px}
+.page.active{display:block}
+.grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:18px}
+.card + .card{margin-top:18px}
+.card h2{margin:0 0 14px;font-size:14px;font-weight:650;display:flex;align-items:center;gap:8px}
+.card h2 .num{width:20px;height:20px;border-radius:6px;background:var(--accent-soft);color:var(--accent);
+  display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono)}
+.hint{font-size:12px;color:var(--ink-2);line-height:1.65}
+.hint code{font-family:var(--mono);background:var(--panel-2);border:1px solid var(--line);padding:1px 5px;border-radius:4px;font-size:11.5px}
+label.f{display:block;font-size:12px;color:var(--ink-2);margin:12px 0 5px;font-weight:550}
+input[type=text],input[type=number],select,textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=text].mono,input[type=number].mono{font-family:var(--mono)}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{min-width:0}
+.row .grow{flex:1}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 13px;font-weight:550;
+  transition:.15s;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3);background:var(--panel-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#923527}
+.btn.ghost{background:transparent}
+.btn.sm{padding:4px 9px;font-size:12px;border-radius:6px}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-2);margin-top:12px}
+.chk input{accent-color:var(--accent)}
+.sep{height:1px;background:var(--line);margin:16px 0}
+
+.stat{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.tag{font-size:12px;padding:4px 10px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-2)}
+.tag b{font-family:var(--mono);color:var(--ink)}
+.tag.good{background:var(--ok-soft);border-color:#cfe5d7;color:var(--ok)}
+.tag.bad{background:var(--danger-soft);border-color:#f0cfcb;color:var(--danger)}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-weight:600;color:var(--ink-2);font-size:11.5px;letter-spacing:.03em;
+  padding:8px 9px;border-bottom:1px solid var(--line);background:var(--panel-2);white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid #f0ede7;vertical-align:middle}
+tr:hover td{background:#fcfaf7}
+td.mono,th.mono{font-family:var(--mono);font-size:12px}
+.tbl-wrap{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+.tbl-wrap table th{position:sticky;top:0;z-index:2}
+.mini-in{width:92px;padding:4px 7px;font-size:12px;font-family:var(--mono);background:#fff}
+.pager{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:12px;color:var(--ink-2)}
+.empty{padding:34px 14px;text-align:center;color:var(--ink-3);font-size:13px}
+
+.notice{border-radius:9px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-bottom:14px}
+.notice.warn{background:var(--warn-soft);border:1px solid #eddcb4;color:#755214}
+.notice.info{background:#eef3f8;border:1px solid #d8e2ee;color:#3c5872}
+.notice.danger{background:var(--danger-soft);border:1px solid #f0cfcb;color:var(--danger)}
+.notice b{font-weight:650}
+
+.savelist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:16px}
+.savecard{border:1px solid var(--line);border-radius:9px;padding:11px 12px;cursor:pointer;background:var(--panel-2);transition:.15s}
+.savecard:hover{border-color:var(--ink-3)}
+.savecard.sel{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent-soft)}
+.savecard .n{font-family:var(--mono);font-weight:600;font-size:12.5px}
+.savecard .m{font-size:11.5px;color:var(--ink-2);margin-top:3px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.chip{font-size:10.5px;padding:2px 7px;border-radius:5px;background:#fff;border:1px solid var(--line);font-family:var(--mono)}
+.chip.ok{background:var(--ok-soft);border-color:#cfe5d7;color:var(--ok)}
+.chip.no{background:var(--danger-soft);border-color:#f0cfcb;color:var(--danger)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:5px 14px;font-size:12.5px;margin-top:8px}
+.kv .k{color:var(--ink-2)}
+.kv .v{font-family:var(--mono)}
+.offsets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;max-height:110px;overflow:auto}
+.offbtn{font-family:var(--mono);font-size:11.5px;padding:3px 8px;border:1px solid var(--line);
+  border-radius:6px;background:var(--panel-2)}
+.offbtn:hover{border-color:var(--accent);color:var(--accent)}
+.editrow{display:grid;grid-template-columns:1fr 100px 1fr auto;gap:8px;align-items:center;margin-bottom:7px}
+.hexview{font-family:var(--mono);font-size:11.5px;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:8px;padding:10px;max-height:230px;overflow:auto;line-height:1.75}
+.hexview .o{color:var(--ink-3)}
+.hexview .a{color:var(--accent-2)}
+
+.doc{max-width:820px}
+.doc h3{font-size:15px;margin:24px 0 8px;padding-left:10px;border-left:3px solid var(--accent)}
+.doc h3:first-child{margin-top:4px}
+.doc ol,.doc ul{padding-left:22px;margin:8px 0}
+.doc li{margin:6px 0}
+.doc p{margin:8px 0}
+.doc table{margin:12px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.doc td,.doc th{padding:8px 11px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:10px 0}
+.step .t{font-weight:650;margin-bottom:5px}
+.step .t span{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:6px;
+  background:var(--accent);color:#fff;font-size:11px;margin-right:8px;font-family:var(--mono)}
+
+footer{text-align:center;color:var(--ink-3);font-size:11.5px;padding:28px 0 0}
+.toast{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;padding:11px 16px;border-radius:9px;
+  font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.18);opacity:0;transform:translateY(8px);
+  transition:.22s;pointer-events:none;z-index:50;max-width:380px}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.err{background:var(--danger)}
+.unit-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.unit-list{max-height:600px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+.unit-item{padding:9px 11px;border-bottom:1px solid #f0ede7;cursor:pointer;display:flex;align-items:center;gap:8px}
+.unit-item:hover{background:var(--panel-2)}
+.unit-item.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.unit-item .nm{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.unit-item .no{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.unit-item .mini{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.unit-item .lk{color:var(--accent);font-size:11px}
+.fieldhead,.fieldrow{display:grid;grid-template-columns:minmax(120px,1fr) 100px 120px 90px 1fr;gap:10px;align-items:center}
+.fieldhead{font-size:11.5px;color:var(--ink-2);font-weight:600;padding:7px 9px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px 8px 0 0}
+.fieldrow{padding:6px 9px;border:1px solid var(--line);border-top:0;font-size:12.5px}
+.fieldrow:nth-child(even){background:#fcfaf7}
+.fieldrow .cur{font-family:var(--mono);font-weight:600}
+.fieldrow .orig{font-family:var(--mono);color:var(--ink-3)}
+.fieldrow .st{font-size:11.5px;color:var(--ok)}
+.fieldrow input{padding:5px 8px;font-family:var(--mono)}
+@media(max-width:900px){.grid,.unit-grid{grid-template-columns:1fr}.status{margin-left:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="brand"><h1>虚伪的假面 · 单机修改器</h1><small>UTAWARERUMONO / MASK OF DECEPTION</small></div>
+    <div class="status">
+      <span><span class="dot" id="dot"></span><span id="stText">未附加进程</span></span>
+      <span class="pill" id="stPid">PID —</span>
+      <span class="pill" id="stBase">BASE —</span>
+    </div>
+  </div>
+  <nav>
+    <button class="active" data-page="live">实时角色</button>
+    <button data-page="mem">数值扫描</button>
+    <button data-page="units">数据表模板</button>
+    <button data-page="save">存档编辑</button>
+    <button data-page="doc">使用指南</button>
+  </nav>
+</header>
+
+<div class="wrap">
+<!-- ============ 实时角色 ============ -->
+<div class="page active" id="page-live">
+  <div class="notice danger">
+    <b>先更正上一版的错误</b><br>
+    之前「人物属性」页里的 <code>300 / 600 / 100 / 60…</code> 是 <code>UnitData.bin</code> 的<b>静态模板参数</b>，不是你游戏里 Lv3 哈克的「体力 66/66、攻击 15、防御 18、敏捷 120、气力 70」。我把静态模板和运行时状态搞混了，那页数值与游戏内显示<b>不一致</b>，已改名为「数据表模板」并降级。<br>
+    本页改用<b>数值变化定位</b>：拿游戏里真实看得见的数字去找运行时地址，定位后改到的数值与界面完全一致。
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
+    <h2><span class="num">1</span>用游戏里的真实数值定位当前角色</h2>
+    <div class="hint">以你截图里的哈克为例：体力 <b>66/66</b>。填 66 扫描一次，然后在游戏里让这个数变化（受一次攻击、换角色、或用掉气力），再填新数字筛选，就能收敛到真正的地址。</div>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:9px">
+      <span class="hint" style="margin:0">当前可见数值</span>
+      <input type="text" class="mono" id="liveValue" value="66" style="width:110px">
+      <select id="liveTypes" style="width:230px">
+        <option value="u16,u32,f32">自动（2/4 字节整数 + 浮点）</option>
+        <option value="u32">仅 4 字节整数</option>
+        <option value="u16">仅 2 字节整数</option>
+        <option value="f32">仅 float</option>
+        <option value="u8,u16,u32,f32">含 1 字节（结果多、噪声大）</option>
+      </select>
+      <button class="btn primary" id="btnLiveScan">① 扫描当前值</button>
+      <button class="btn ghost" id="btnLiveReset">重置</button>
+    </div>
+    <div class="sep"></div>
+    <div class="row" style="flex-wrap:wrap;gap:9px">
+      <span class="hint" style="margin:0">变化后的新值</span>
+      <input type="text" class="mono" id="liveNew" placeholder="例如 58" style="width:110px">
+      <button class="btn" id="btnLiveFilter" disabled>② 按新值筛选</button>
+      <button class="btn" id="btnLiveChanged" disabled>或：只保留「变过的」</button>
+      <span class="tag" id="liveStat">尚未扫描</span>
+    </div>
+    <div class="hint" style="margin-top:9px">提示：让数值变化后，先点「只保留变过的」再填新值，收敛最快。若结果仍很多，再重复一次变化 + 筛选。</div>
+  </div>
+
+  <div class="unit-grid">
+    <div class="card" style="padding:12px">
+      <div class="hint" style="margin:0 0 9px">候选地址（点选一处作为角色锚点）</div>
+      <div class="unit-list" style="max-height:520px" id="liveList"></div>
+    </div>
+    <div class="card" id="liveCard">
+      <div class="empty" id="liveEmpty">筛选出少量地址后，点左边任意一个，工具会把它周围 ±256 字节解析成可编辑的候选字段表。数值碰巧与界面相同的字段会被标记，但<b>需要你进游戏改一个值来确认它到底是不是该属性</b>。</div>
+      <div id="liveEditor" style="display:none">
+        <div class="row" style="flex-wrap:wrap;gap:9px;margin-bottom:10px">
+          <b id="liveAnchorName">候选字段</b>
+          <span class="tag" id="liveAnchorAddr">—</span>
+          <label class="chk" style="margin:0 0 0 auto"><input type="checkbox" id="liveOnlyNamed" checked>只显示数值匹配的字段</label>
+        </div>
+        <div class="fieldhead"><span>候选字段</span><span>地址</span><span>当前值</span><span>改成</span><span>操作</span></div>
+        <div id="liveFields" style="max-height:420px;overflow:auto"></div>
+        <div class="notice warn" style="margin:12px 0 0"><b>数值相同不代表就是该属性</b>：66 / 15 / 18 / 120 / 70 在 1GB 内存里大量出现，标记只是「碰巧数值一样」。请改一个明显的值（例如把某字段改成 999）进游戏看界面哪里变了，再确认字段含义。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 数据表模板（实验性） ============ -->
+<div class="page" id="page-units">
+  <div class="notice danger"><b>此页数值与游戏内显示不一致，请勿当成角色当前状态</b><br>
+    下面来自 <code>UnitData.bin</code> 的静态模板参数（300/600/100/60…），不是战斗中的体力/攻击/防御。要改游戏里看得见的数值，请用「实时角色」或「数值扫描」页。此页仅供研究数据表结构。</div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="row" style="flex-wrap:wrap;gap:12px">
+      <div style="flex:1;min-width:260px">
+        <h2 style="margin:0 0 4px">人物属性表</h2>
+        <div class="hint" id="unitStatus">尚未连接。点右侧按钮，自动识别游戏并列出全部角色的属性。</div>
+      </div>
+      <button class="btn primary" id="btnUnitConnect">一键连接并识别人物</button>
+      <button class="btn" id="btnUnitRefresh">刷新数值</button>
+    </div>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:9px">
+      <input type="text" id="unitSearch" class="grow" placeholder="搜索角色名或编号，例如：哈克 / 久遠 / #42" style="max-width:330px">
+      <label class="chk" style="margin:0"><input type="checkbox" id="unitOnlyActive" checked>只显示有属性的单位</label>
+      <span class="tag" id="unitCount">0 个单位</span>
+      <button class="btn sm" id="btnLabelsToggle" style="margin-left:auto">字段命名</button>
+    </div>
+    <div id="labelsPanel" style="display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:12px">
+      <div class="hint" style="margin-bottom:8px">字段含义是按数值形态推测的，可改成你确认过的名称（会保存到 <code>unit_config.json</code>）。</div>
+      <div id="labelInputs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px"></div>
+      <button class="btn sm" id="btnLabelsSave" style="margin-top:10px">保存字段名</button>
+    </div>
+  </div>
+
+  <div class="unit-grid">
+    <div class="card" style="padding:12px">
+      <div class="hint" style="margin:0 0 9px" id="unitListHint">角色列表</div>
+      <div class="unit-list" id="unitList"></div>
+    </div>
+    <div class="card" id="unitDetail">
+      <div class="empty" id="unitEmpty">连接后从左侧点选一个角色，即可直接修改它的各项数值。</div>
+      <div id="unitEditor" style="display:none">
+        <div class="row" style="flex-wrap:wrap;gap:10px;margin-bottom:6px">
+          <input type="text" id="unitName" style="max-width:220px;font-weight:650" title="可直接改名，回车保存">
+          <span class="tag" id="unitNum">#0</span>
+          <span class="tag" id="unitAddr">—</span>
+          <label class="chk" style="margin:0 0 0 auto"><input type="checkbox" id="unitLock">锁定数值</label>
+        </div>
+        <div class="hint" style="margin-bottom:12px">修改输入框后按回车或移开焦点即<b>立即写入游戏内存</b>；「原值」是数据表初始值，可一键还原。</div>
+        <div class="fieldhead"><span>属性字段</span><span>内存当前值</span><span>改成</span><span>原值</span><span>状态</span></div>
+        <div id="fieldRows"></div>
+        <div class="row" style="margin-top:14px;flex-wrap:wrap;gap:8px">
+          <button class="btn primary" id="btnUnitWriteAll">批量写入全部</button>
+          <button class="btn" id="btnUnitRestore">还原为初始值</button>
+          <button class="btn" id="btnUnitBoost">前 8 项 ×2</button>
+          <button class="btn ghost" id="btnUnitRead">重新读取</button>
+        </div>
+        <div class="notice info" style="margin:14px 0 0">
+          这是游戏 <code>UnitData.bin</code> 在内存中的<b>角色基础属性表</b>（自动定位，重开游戏也不失效）。改这里会影响游戏读取角色属性，通常在<b>进入战斗 / 重新编成 / 读档后</b>生效；若当前战斗中已生成的单位对象缓存了旧值，请用「数值扫描」页改实时 HP。
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 内存修改 ============ -->
+<div class="page" id="page-mem">
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2><span class="num">1</span>附加游戏进程</h2>
+        <div class="hint">先启动游戏，然后在这里附加。修改器只认进程名，不依赖窗口标题（游戏标题随语言变化）。</div>
+        <label class="f">进程列表</label>
+        <select id="procSel"></select>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary grow" id="btnAttach">附加进程</button>
+          <button class="btn" id="btnRefresh">刷新</button>
+        </div>
+        <div class="sep"></div>
+        <div class="hint" id="attachInfo">尚未附加。若附加失败，请用管理员身份运行启动器。</div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">2</span>数值扫描</h2>
+        <label class="f">数值类型</label>
+        <select id="scanType">
+          <option value="i32">4 字节整数（金钱 / BP / HP 首选）</option>
+          <option value="u32">4 字节无符号整数</option>
+          <option value="i16">2 字节整数</option>
+          <option value="u16">2 字节无符号整数</option>
+          <option value="i8">1 字节整数</option>
+          <option value="u8">1 字节无符号整数</option>
+          <option value="i64">8 字节整数</option>
+          <option value="f32">单精度浮点 float</option>
+          <option value="f64">双精度浮点 double</option>
+        </select>
+        <label class="f">当前数值（游戏里看得见的那个数）</label>
+        <input type="text" class="mono" id="scanValue" placeholder="例如 12500">
+        <label class="chk"><input type="checkbox" id="scanAlign" checked>按类型宽度对齐扫描（更快、误报少）</label>
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary grow" id="btnFirst">首次扫描</button>
+          <button class="btn ghost" id="btnReset">重置</button>
+        </div>
+        <div class="sep"></div>
+        <label class="f">再次扫描（在结果里继续筛选）</label>
+        <select id="nextMode">
+          <option value="equal">等于</option>
+          <option value="not_equal">不等于</option>
+          <option value="greater">大于</option>
+          <option value="less">小于</option>
+          <option value="changed">数值已变化</option>
+          <option value="unchanged">数值未变化</option>
+          <option value="increased">数值增大了</option>
+          <option value="decreased">数值减小了</option>
+          <option value="increased_by">增加了指定量</option>
+          <option value="decreased_by">减少了指定量</option>
+          <option value="between">介于两值之间</option>
+        </select>
+        <div class="row" style="margin-top:8px">
+          <input type="text" class="mono grow" id="nextValue" placeholder="数值 / 变化量">
+          <input type="text" class="mono grow" id="nextExtra" placeholder="上限（仅“介于”用）" style="display:none">
+        </div>
+        <button class="btn grow" id="btnNext" style="width:100%;margin-top:9px" disabled>再次扫描</button>
+        <div class="hint" style="margin-top:10px" id="scanHint">典型流程：记下金钱 → 首次扫描 → 买件东西让钱变化 → 输入新金额「等于」再扫 → 重复到只剩几个地址。</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2><span class="num">3</span>扫描结果 <span class="tag" id="resCount" style="margin-left:auto">0 个地址</span></h2>
+        <div class="stat">
+          <span class="tag" id="resInfo">尚未扫描</span>
+          <span class="tag" id="resType">类型 —</span>
+          <button class="btn sm" id="btnReloadRes" style="margin-left:auto">刷新当前值</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th class="mono">地址</th><th>当前值</th><th>首次值</th><th class="mono">模块 RVA</th><th>写入新值</th><th></th></tr></thead>
+            <tbody id="resBody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button class="btn sm" id="pgPrev">上一页</button>
+          <span id="pgInfo">—</span>
+          <button class="btn sm" id="pgNext">下一页</button>
+          <span class="hint" style="margin-left:auto">模块 RVA 有值表示地址落在主模块内，可跨重启复用</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">4</span>地址表 / 数值锁定
+          <button class="btn sm" id="btnAddManual" style="margin-left:auto">手动添加</button></h2>
+        <div class="hint" style="margin-bottom:10px">勾选「锁定」后，修改器每 0.12 秒把设定值写回内存，实现无限金钱 / 无限 HP。地址表自动保存到 <code>address_table.json</code>，重启游戏后按「模块基址 + RVA」自动还原。</div>
+        <div class="tbl-wrap" style="max-height:300px">
+          <table>
+            <thead><tr><th>名称</th><th class="mono">地址</th><th>类型</th><th>实时值</th><th>设定值</th><th>锁定</th><th></th></tr></thead>
+            <tbody id="tblBody"></tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <span class="hint">快捷键：Alt + 1~9 切换对应条目锁定状态</span>
+          <button class="btn sm" id="btnTblRefresh" style="margin-left:auto">刷新实时值</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>运行日志</h2>
+        <div class="hexview" id="logView" style="max-height:130px">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 存档编辑 ============ -->
+<div class="page" id="page-save">
+  <div class="notice warn"><b>关于存档校验（请先读）</b><br>
+    头部 <code>0x00</code> 的 A 校验已完整逆向：<b>A = 负载(0x10 起)所有字节之和 + 负载长度</b>，本机 27 个存档 100% 验证通过，修改器会自动重算。<br>
+    头部 <code>0x04</code> 的 B 字段<b>不是任何标准 CRC / FNV / 摘要算法</b>，尚未逆向成功，因此提供「保留原值 / 清零 / 自定义」三种策略。<b>请务必先在游戏里另存一个档做试验</b>：若读档提示损坏，用本页「一键还原」恢复备份即可。<br>
+    <code>0x0C</code> 的 C 字段经比对确认为游戏数据（常见 0 或 0xBB80），并非校验和。</div>
+
+  <div class="card">
+    <h2><span class="num">1</span>选择存档</h2>
+    <label class="f">存档根目录</label>
+    <div class="row">
+      <input type="text" id="saveRoot" class="grow" placeholder="留空则自动探测">
+      <button class="btn" id="btnLoadSaves">加载存档</button>
+    </div>
+    <div class="savelist" id="saveList" style="margin-top:14px"></div>
+    <div class="hint" id="saveRootInfo">—</div>
+  </div>
+
+  <div class="card" id="saveEditor" style="display:none">
+    <h2><span class="num">2</span>校验信息与数值定位</h2>
+    <div class="row" style="gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="min-width:250px;flex:1">
+        <div class="kv" id="saveKv"></div>
+      </div>
+      <div style="min-width:280px;flex:1.4">
+        <label class="f" style="margin-top:0">在存档里搜索当前数值（例如游戏里金钱 = 12500）</label>
+        <div class="row">
+          <input type="text" class="mono grow" id="svValue" placeholder="数值">
+          <select id="svType" style="width:150px">
+            <option value="u32">u32（4字节）</option>
+            <option value="i32">i32（4字节）</option>
+            <option value="u16">u16（2字节）</option>
+            <option value="i16">i16（2字节）</option>
+            <option value="f32">float</option>
+          </select>
+          <button class="btn" id="btnSvSearch">搜索</button>
+        </div>
+        <div class="hint" style="margin-top:8px" id="svSearchInfo">搜到的偏移可直接点选，加入下方编辑列表。注意排除 <code>0x00–0x23</code> 的文件头区域。</div>
+        <div class="offsets" id="svOffsets"></div>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <h2><span class="num">3</span>要写入的修改</h2>
+    <div id="editRows"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn sm" id="btnAddEdit">+ 添加一行</button>
+      <span class="hint" style="margin-left:8px">数值别写过大（道具数量建议 ≤ 99），避免数组越界崩溃</span>
+    </div>
+    <div class="sep"></div>
+    <div class="row" style="flex-wrap:wrap;gap:14px">
+      <div style="min-width:230px">
+        <label class="f" style="margin-top:0">B 字段策略</label>
+        <select id="bMode">
+          <option value="keep">保留原值（推荐先试）</option>
+          <option value="zero">清零</option>
+          <option value="custom">自定义值</option>
+        </select>
+      </div>
+      <div style="min-width:160px;display:none" id="bCustomWrap">
+        <label class="f" style="margin-top:0">自定义 B（支持 0x 前缀）</label>
+        <input type="text" class="mono" id="bValue" value="0">
+      </div>
+      <div style="align-self:flex-end;display:flex;gap:8px;margin-left:auto">
+        <button class="btn" id="btnRestore">一键还原备份</button>
+        <button class="btn primary" id="btnPatch">备份并写入</button>
+      </div>
+    </div>
+    <div class="notice info" id="patchResult" style="margin:14px 0 0;display:none"></div>
+    <div class="sep"></div>
+    <h2>十六进制查看</h2>
+    <div class="row" style="margin-bottom:10px">
+      <span class="hint">起始偏移</span>
+      <input type="text" class="mono" id="hexOff" value="0" style="width:110px">
+      <button class="btn sm" id="btnHex">查看</button>
+      <button class="btn sm" id="btnHexNext">后 256 字节</button>
+    </div>
+    <div class="hexview" id="hexView">—</div>
+  </div>
+</div>
+
+<!-- ============ 使用指南 ============ -->
+<div class="page doc" id="page-doc">
+  <div class="notice info"><b>适用对象</b>　PC 版《传颂之物：虚伪的假面》（32 位 PE32，Aquaplus UT2 引擎，无反作弊）。本工具仅做本机进程内存数值读写与本地存档文件编辑，不注入 DLL、不 hook、不修改 exe、不触碰任何启动校验组件，也不会改动你做过的简体中文字形补丁。<b>仅限个人单机离线使用。</b></div>
+
+  <h3>更正：数据表模板页的数值不是角色当前状态</h3>
+  <p>上一版把 <code>UnitData.bin</code> 的静态模板参数（<code>300 / 600 / 100 / 60…</code>）当成角色属性，与游戏里 Lv3 哈克显示的「体力 66/66、攻击 15、防御 18、敏捷 120、气力 70」不一致。界面上那组数值很可能是按等级 / 装备 / 成长<b>动态算出来的</b>，并不成组存于内存；按 u8 / u16 / u32 / float 做全内存聚类、连续模式和邻近区域排查，命中的都是查表、纹理、地图格子和 UI 数值缓存，不是角色对象。</p>
+  <p>该页已降名为「数据表模板」并加警示，<b>请勿当成当前角色状态</b>。默认首页已改为「实时角色」。</p>
+
+  <h3>实时角色页：改到与界面一致的数值</h3>
+  <ol>
+    <li>填游戏里真实可见的数字（如体力 <code>66</code>），类型选「自动」，点「① 扫描当前值」。1GB 内存约 3.5 秒，出现约 25 万个候选是正常的。</li>
+    <li>回游戏让这个数变化（受击、换人、消耗气力），填新数字点「② 按新值筛选」，或先点「只保留变过的」。重复 1~2 轮通常收敛到个位数地址。</li>
+    <li>点选候选地址，工具把周围 ±256 字节解析成一张<b>角色卡</b>，字段可直接改（u16 / u32 / f32 可切）。</li>
+  </ol>
+  <p>字段标记是<b>中性</b>的：只把数值碰巧等于 <code>66 / 15 / 18 / 120 / 70</code> 的字段标成「= 界面数值 N」，不声称它就是该属性。这些小整数在 1GB 内存里大量出现，自动命名必然误导（<code>1 / 3 / 4</code> 已排除）。请改一个明显的值（如 999）进游戏看界面哪里变化，再确认字段含义。</p>
+
+  <h3>数值扫描：改金钱</h3>
+  <div class="step"><div class="t"><span>1</span>启动与附加</div>先运行游戏，再运行本修改器（<code>启动修改器.bat</code>），界面会自动在浏览器打开。在「内存修改」页点「刷新」→ 选中 <code>Utawarerumono Mask of Deception.exe</code> → 点「附加进程」。状态栏变绿并显示模块基址即成功。</div>
+  <div class="step"><div class="t"><span>2</span>首次扫描</div>进入游戏里能看到金钱的界面，记下准确数字。类型选「4 字节整数」，填入数字，点「首次扫描」。首次扫描会遍历全部可读内存区域，通常几秒。</div>
+  <div class="step"><div class="t"><span>3</span>让数值变化，反复筛选</div>回游戏买/卖一件东西使金钱改变，在「再次扫描」里输入新金额、选「等于」，点再次扫描。重复 2~3 次，结果通常收敛到 1~5 个地址。</div>
+  <div class="step"><div class="t"><span>4</span>写入 / 锁定</div>在结果行右侧输入目标值点「写入」，或点「加入」放进地址表并勾选「锁定」实现无限金钱。地址表保存在 <code>address_table.json</code>。</div>
+
+  <h3>其它数值怎么找（依据交接说明书 §5）</h3>
+  <table>
+    <thead><tr><th>目标</th><th>建议</th><th>引擎锚点 / 备注</th></tr></thead>
+    <tbody>
+      <tr><td>BP（升级用战斗点数）</td><td>战后结算界面扫 4 字节，按变化量筛选</td><td><code>CBattleBonusPointTask@Battle@@</code></td></tr>
+      <tr><td>等级 / 经验</td><td>先试 4 字节，不行试 2 字节</td><td><code>CLevelUpTask@Battle@@</code></td></tr>
+      <tr><td>道具数量</td><td>买一个道具前后各扫一次；找到数量后向前找数组基址</td><td><code>CItemList@Window@@</code></td></tr>
+      <tr><td>战斗 HP / 一击必杀</td><td>战斗中扫当前 HP，被攻击后按「减小了」再扫</td><td><code>CDamageAct@@</code>；HP 大概率 int</td></tr>
+      <tr><td>行动力 / 技能</td><td>多次行动前后对比，注意每回合重置</td><td>需要动态调试确认</td></tr>
+      <tr><td>战斗速度</td><td>无直接数值字段，需 hook</td><td><code>CBattleSpeed@Battle@@</code>（本工具不做注入）</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">上述「目标值类型」是同类游戏的常见形态，说明书明确要求<b>必须实测确认</b>——本工具采用「你自己搜值」的方式，不预设任何未经验证的偏移，因此不会因版本/搬迁失效。</p>
+
+  <h3>关于地址会变（ASLR 与引擎堆）</h3>
+  <p>exe 带 <code>DYNAMIC_BASE</code>，且对象由自研分配器 <code>Kernel::CAllocator</code> 分配在引擎堆上，所以<b>每次启动地址都会变</b>。本工具的应对：</p>
+  <ul>
+    <li>扫描结果里的「模块 RVA」列：有值说明该地址落在主模块静态区，可按 <code>模块基址 + RVA</code> 跨重启复用；空白说明在堆上，重启后必须重新扫描。</li>
+    <li>地址表自动记录 RVA，重新附加进程时会自动按新基址还原。堆地址条目则会保留原值，需手动重新定位。</li>
+    <li>战斗对象每场战斗重建，HP 类地址在战斗结束 / 读档 / 重开后失效属正常现象，重新按流程扫描即可。</li>
+  </ul>
+
+  <h3>存档编辑路线（备用）</h3>
+  <p>当内存路线卡住时可用存档编辑：改完读档即生效，不受 ASLR 影响。本工具会自动备份原档（<code>.bak-时间戳</code>）、重算已破解的 A 校验，并提供一键还原。</p>
+  <p class="notice warn" style="margin:10px 0"><b>已知限制：</b>头部 B 字段（0x04）算法未逆向，游戏是否校验它尚未实测。请务必用试验存档验证：改一个明显无关的数值 → 进游戏读档 → 若提示存档损坏，说明 B 参与校验，请用「一键还原」恢复，并改走内存路线。B 的三种策略可在界面里切换尝试。</p>
+  <p>定位数值建议用「差分法」：存两个不同进度的档，在存档编辑页用已知数值搜索偏移；也可以先在游戏中用内存扫描找到数值，再用该数值的字节模式在存档里搜对应偏移。</p>
+
+  <h3>本次逆向新增结论（相对交接说明书）</h3>
+  <ul>
+    <li><b>A 校验已破解</b>：<code>A = Σ(save[0x10:]) + (len - 16)</code>，27/27 个存档（含一代《给逝者的摇篮曲》与二代）全部吻合，两代格式同构。</li>
+    <li><b>C 不是校验和</b>：0x0C 字段常见 0 或 0xBB80(48000)，是游戏数据 / 标志，说明书把它列为「校验 C」属误判。</li>
+    <li><b>exe 内 FNV 函数已定位</b>：file <code>0xFBA65</code>（va ≈ <code>0xFC665</code>）是一个只处理 4 字节的 FNV-1a（哈希 "GAME"/"1.00" 这类短标签），并非存档校验。</li>
+    <li><b>CRC32 表</b>：标准表位于 file <code>0x4CE890</code>，另有副本 <code>0x4E6340</code>；B 不匹配任何 CRC32 起始范围/初值/异或组合，也不是 MD5/SHA/Adler/FNV 加常量偏移。</li>
+  </ul>
+
+  <h3>安全与纪律</h3>
+  <ul>
+    <li>改存档前必定自动备份；提供一键还原。</li>
+    <li>写入数值防越界：道具数量别写 99999。</li>
+    <li>不修改 exe 本体，不动 <code>Data/CHN/Texture/font.tex</code>。</li>
+    <li>若游戏以管理员权限运行，修改器也需管理员权限才能附加（否则 OpenProcess 失败）。</li>
+  </ul>
+  <footer>本地工具 · 数据不上传 · 关闭控制台窗口即退出</footer>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+let PAGE_SIZE = 100, page = 0, total = 0, base = 0;
+let curSave = null, editRows = [];
+
+function toast(msg, err=false){
+  const t=$('#toast'); t.textContent=msg; t.className='toast show'+(err?' err':'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',3200);
+}
+async function api(path, body){
+  const opt = body===undefined ? {} : {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)};
+  const r = await fetch(path,opt);
+  const j = await r.json();
+  if(j && j.ok===false) throw new Error(j.error||'请求失败');
+  return j;
+}
+const hex = n => {
+  const v = Number(n);
+  if (Number.isSafeInteger(v) && v > 0xFFFFFFFF) return '0x'+BigInt(v).toString(16).toUpperCase();
+  return '0x'+(v>>>0).toString(16).toUpperCase().padStart(8,'0');
+};
+const fmtVal = v => v===null||v===undefined ? '—' : (Number.isInteger(v)? String(v) : Number(v).toFixed(4));
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ---------- Tabs ----------
+$$('nav button').forEach(b=>b.onclick=()=>{
+  $$('nav button').forEach(x=>x.classList.remove('active'));
+  $$('.page').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); $('#page-'+b.dataset.page).classList.add('active');
+  if(b.dataset.page==='save' && !$('#saveList').children.length) loadSaves();
+  if(b.dataset.page==='units'){ refreshUnitStatus(); if(!unitRows.length) loadUnits(); }
+  if(b.dataset.page==='live') liveStatus();
+});
+
+// ---------- Status ----------
+async function refreshStatus(){
+  try{
+    const s = await api('/api/status');
+    $('#dot').classList.toggle('on', s.attached);
+    $('#stText').textContent = s.attached ? '已附加 · '+s.name : '未附加进程';
+    $('#stPid').textContent = 'PID '+(s.pid??'—');
+    $('#stBase').textContent = 'BASE '+(s.baseHex||'—');
+    base = s.base;
+    $('#attachInfo').textContent = s.attached
+      ? `已连接 PID ${s.pid}，主模块基址 ${s.baseHex}（ASLR 后的实际基址，不是 0x400000）。`
+      : (s.win ? '尚未附加。若附加失败，请用管理员身份运行启动器。' : '当前不是 Windows，进程内存功能不可用。');
+    const lv=$('#logView');
+    lv.textContent = (s.log&&s.log.length) ? s.log.slice(-12).reverse().join('\n') : '—';
+  }catch(e){}
+}
+async function loadProcs(){
+  try{
+    const j = await api('/api/processes');
+    const sel=$('#procSel'); const old=sel.value;
+    sel.innerHTML = j.processes.length ? '' : '<option value="">（没有找到进程，请先启动游戏）</option>';
+    j.processes.forEach(p=>{
+      const o=document.createElement('option'); o.value=p.pid;
+      o.textContent=(p.game?'★ ':'')+p.name+'  [PID '+p.pid+']';
+      o.dataset.name=p.name; sel.appendChild(o);
+    });
+    const g=j.processes.find(p=>p.game);
+    if(g) sel.value=g.pid; else if(old) sel.value=old;
+  }catch(e){ toast(e.message,true); }
+}
+$('#btnRefresh').onclick=loadProcs;
+$('#btnAttach').onclick=async()=>{
+  const sel=$('#procSel');
+  if(!sel.value) return toast('请先启动游戏并刷新进程列表',true);
+  try{
+    const j=await api('/api/attach',{pid:parseInt(sel.value),name:sel.selectedOptions[0].dataset.name});
+    toast('附加成功，模块基址 '+j.baseHex); refreshStatus();
+  }catch(e){ toast(e.message,true); }
+};
+
+// ---------- Scan ----------
+$('#nextMode').onchange=()=>{
+  const m=$('#nextMode').value;
+  $('#nextExtra').style.display = m==='between'?'block':'none';
+  const noVal=['changed','unchanged','increased','decreased'].includes(m);
+  $('#nextValue').style.display = noVal?'none':'block';
+  $('#nextValue').placeholder = m.includes('_by')?'变化量':(m==='between'?'下限':'数值');
+};
+$('#btnFirst').onclick=async()=>{
+  const v=$('#scanValue').value.trim();
+  if(!v) return toast('请填入游戏里当前显示的数值',true);
+  $('#btnFirst').disabled=true; $('#btnFirst').textContent='扫描中…';
+  try{
+    const j=await api('/api/scan/first',{value:v,typ:$('#scanType').value,align:$('#scanAlign').checked});
+    toast('首次扫描完成，命中 '+j.count+' 个地址');
+    $('#btnNext').disabled=false; page=0; await loadResults();
+  }catch(e){ toast(e.message,true); }
+  finally{ $('#btnFirst').disabled=false; $('#btnFirst').textContent='首次扫描'; }
+};
+$('#btnNext').onclick=async()=>{
+  const m=$('#nextMode').value;
+  try{
+    const j=await api('/api/scan/next',{mode:m,value:$('#nextValue').value,extra:$('#nextExtra').value});
+    toast('筛选完成，剩余 '+j.count+' 个地址');
+    page=0; await loadResults();
+  }catch(e){ toast(e.message,true); }
+};
+$('#btnReset').onclick=async()=>{
+  await api('/api/scan/reset',{}); page=0; total=0;
+  $('#btnNext').disabled=true; $('#resBody').innerHTML='';
+  $('#resCount').textContent='0 个地址'; $('#resInfo').textContent='尚未扫描';
+  toast('扫描状态已重置');
+};
+$('#btnReloadRes').onclick=()=>loadResults();
+$('#pgPrev').onclick=()=>{ if(page>0){page--;loadResults();} };
+$('#pgNext').onclick=()=>{ if((page+1)*PAGE_SIZE<total){page++;loadResults();} };
+
+async function loadResults(){
+  try{
+    const j=await api(`/api/results?offset=${page*PAGE_SIZE}&count=${PAGE_SIZE}`);
+    total=j.total; base=j.base;
+    $('#resCount').textContent=total+' 个地址';
+    $('#resInfo').textContent=j.info||'尚未扫描';
+    $('#resType').textContent='类型 '+(j.scan_type||'—');
+    $('#pgInfo').textContent = total? `第 ${page+1} / ${Math.ceil(total/PAGE_SIZE)} 页`: '—';
+    $('#resBody').innerHTML = j.items.length ? j.items.map(r=>`
+      <tr>
+        <td class="mono">${esc(r.hex)}</td>
+        <td class="mono"><b>${esc(fmtVal(r.value))}</b></td>
+        <td class="mono" style="color:var(--ink-3)">${esc(fmtVal(r.prev))}</td>
+        <td class="mono" style="color:${r.rva!==null?'var(--ok)':'var(--ink-3)'}">${r.rva!==null?'+0x'+r.rva.toString(16).toUpperCase():'堆地址'}</td>
+        <td><input class="mini-in" id="w_${r.addr}" placeholder="新值"></td>
+        <td style="white-space:nowrap">
+          <button class="btn sm" onclick="writeOne(${r.addr})">写入</button>
+          <button class="btn sm" onclick="addToTable(${r.addr},'${r.value}')">加入</button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="6" class="empty">没有结果。首次扫描请填入游戏里当前显示的准确数值。</td></tr>';
+  }catch(e){ toast(e.message,true); }
+}
+window.writeOne=async(addr)=>{
+  const v=$('#w_'+addr).value.trim(); if(!v) return toast('请输入新值',true);
+  try{ await api('/api/write',{addr,value:v,typ:$('#scanType').value}); toast('已写入 '+hex(addr)); loadResults(); }
+  catch(e){ toast(e.message,true); }
+};
+window.addToTable=async(addr,val)=>{
+  const name=prompt('给这个地址起个名字：','金钱 / BP / HP');
+  if(name===null) return;
+  try{ await api('/api/table/add',{name:name||'新地址',addr,typ:$('#scanType').value,value:0});
+       toast('已加入地址表'); loadTable(); }
+  catch(e){ toast(e.message,true); }
+};
+$('#btnAddManual').onclick=async()=>{
+  const a=prompt('输入地址（支持 0x 前缀）：','0x'); if(!a) return;
+  const n=prompt('名称：','自定义地址'); if(n===null) return;
+  try{ await api('/api/table/add',{name:n||'自定义',addr:parseInt(a,16),typ:$('#scanType').value,value:0});
+       loadTable(); }catch(e){ toast(e.message,true); }
+};
+
+// ---------- Address table ----------
+async function loadTable(){
+  try{
+    const j=await api('/api/table');
+    $('#tblBody').innerHTML = j.table.length ? j.table.map(t=>`
+      <tr>
+        <td><input class="mini-in" style="width:120px" value="${esc(t.name)}" onchange="updT(${t.id},'name',this.value)"></td>
+        <td class="mono">${hex(t.addr)}</td>
+        <td>${esc(t.typ)}</td>
+        <td class="mono cur_${t.id}" style="color:var(--ink-3)">…</td>
+        <td><input class="mini-in" type="text" value="${esc(t.value)}" onchange="updT(${t.id},'value',this.value,true)"></td>
+        <td><label class="chk" style="margin:0"><input type="checkbox" ${t.locked?'checked':''} onchange="toggleLock(${t.id},this.checked)"></label></td>
+        <td style="white-space:nowrap">
+          <button class="btn sm" onclick="applyT(${t.id})">写入</button>
+          <button class="btn sm" onclick="delT(${t.id})">删</button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="7" class="empty">地址表为空。从扫描结果点「加入」，或点右上「手动添加」。</td></tr>';
+    j.table.forEach(t=>readCur(t));
+  }catch(e){ toast(e.message,true); }
+}
+async function readCur(t){
+  try{
+    const j=await api('/api/read',{addr:t.addr,typ:t.typ});
+    const el=document.querySelector('.cur_'+t.id);
+    if(el) el.textContent=fmtVal(j.value);
+  }catch(e){}
+}
+$('#btnTblRefresh').onclick=loadTable;
+window.updT=async(id,k,v,syncLock)=>{
+  const body={id,[k]:v};
+  if(syncLock) body.lock_value=v;
+  try{ await api('/api/table/update',body); }
+  catch(e){ toast(e.message,true); }
+};
+window.toggleLock=async(id,on)=>{
+  const j=await api('/api/table'); const t=j.table.find(x=>x.id===id); if(!t) return;
+  try{ await api('/api/table/update',{id,locked:on,lock_value:t.value}); toast(on?'已开启锁定':'已关闭锁定'); }
+  catch(e){ toast(e.message,true); }
+};
+window.applyT=async(id)=>{
+  try{ await api('/api/table/apply',{id}); toast('已写入'); loadTable(); }
+  catch(e){ toast(e.message,true); }
+};
+window.delT=async(id)=>{
+  await api('/api/table/remove',{id}); loadTable();
+};
+document.addEventListener('keydown',e=>{
+  if(e.altKey && /^[1-9]$/.test(e.key)){
+    e.preventDefault();
+    api('/api/table').then(j=>{
+      const t=j.table[parseInt(e.key)-1]; if(!t) return;
+      return api('/api/table/update',{id:t.id,locked:!t.locked,lock_value:t.value});
+    }).then(()=>{loadTable();}).catch(()=>{});
+  }
+});
+
+// ---------- Save editor ----------
+async function loadSaves(){
+  const root=$('#saveRoot').value.trim();
+  try{
+    const j=await api('/api/saves'+(root?'?root='+encodeURIComponent(root):''));
+    $('#saveRootInfo').textContent = j.exists ? '存档目录：'+j.root : '目录不存在：'+j.root+'（可在上方手动指定）';
+    $('#saveList').innerHTML = j.saves.length ? j.saves.map((s,i)=>`
+      <div class="savecard" data-i="${i}">
+        <div class="n">${esc(s.name)}</div>
+        <div class="m">${s.error?esc(s.error):esc(s.tag)+' · '+(s.size||0)+' 字节'}</div>
+        ${s.aValid!==undefined?`<div class="chips">
+          <span class="chip ${s.aValid?'ok':'no'}">A ${s.aValid?'有效':'异常'}</span>
+          <span class="chip">L ${hex(s.L)}</span>
+          <span class="chip">B ${hex(s.B)}</span>
+        </div>`:''}
+      </div>`).join('') : '<div class="empty">没有找到 .DAT 存档</div>';
+    $$('.savecard').forEach(el=>el.onclick=()=>selectSave(j.saves[+el.dataset.i], +el.dataset.i));
+  }catch(e){ toast(e.message,true); }
+}
+$('#btnLoadSaves').onclick=loadSaves;
+function selectSave(s, idx){
+  curSave=s;
+  $$('.savecard').forEach(x=>x.classList.toggle('sel', +x.dataset.i===idx));
+  $('#saveEditor').style.display='block';
+  $('#saveKv').innerHTML=`
+    <div class="k">文件</div><div class="v">${esc(s.name)}</div>
+    <div class="k">大小 / 类型</div><div class="v">${s.size} B · ${esc(s.tag)} · v${esc(s.ver)}</div>
+    <div class="k">A 存储值</div><div class="v">${hex(s.A)}</div>
+    <div class="k">A 计算值</div><div class="v" style="color:${s.aValid?'var(--ok)':'var(--danger)'}">${hex(s.calcA)} ${s.aValid?'✓':'✗'}</div>
+    <div class="k">B（未逆向）</div><div class="v">${hex(s.B)}</div>
+    <div class="k">C（游戏数据）</div><div class="v">${hex(s.C)}</div>
+    <div class="k">负载长度 L</div><div class="v">${hex(s.L)} ${s.lenValid?'✓':'✗'}</div>
+    <div class="k">备份数</div><div class="v">${(s.backups||[]).length}</div>`;
+  toast('已选择 '+s.name);
+  hexView(0);
+}
+$('#btnSvSearch').onclick=async()=>{
+  if(!curSave) return;
+  const v=$('#svValue').value.trim(); if(!v) return toast('请输入数值',true);
+  try{
+    const j=await api('/api/save/search',{path:curSave.path,value:v,typ:$('#svType').value});
+    $('#svSearchInfo').textContent=`找到 ${j.count} 处（字节模式 ${j.pattern}）${j.count>=300?'，已截断到前 300 处':''}。点击偏移加入编辑列表。`;
+    $('#svOffsets').innerHTML=j.offsets.map(o=>`<button class="offbtn" data-o="${o}">0x${o.toString(16).toUpperCase()}</button>`).join('')||'<span class="hint">没有匹配，换个数值类型再试</span>';
+    $$('#svOffsets .offbtn').forEach(b=>b.onclick=()=>{ addEditRow(+b.dataset.o, $('#svType').value); });
+  }catch(e){ toast(e.message,true); }
+};
+function addEditRow(off=0,typ='u32'){
+  const id=Date.now()+Math.random();
+  editRows.push({id,off,typ});
+  renderEdits();
+}
+function renderEdits(){
+  $('#editRows').innerHTML=editRows.length?editRows.map(e=>`
+    <div class="editrow" data-id="${e.id}">
+      <input type="text" class="mono" placeholder="偏移（0x 或十进制）" value="${e.off?('0x'+e.off.toString(16).toUpperCase()):''}">
+      <select class="et"><option value="u32" ${e.typ==='u32'?'selected':''}>u32</option>
+        <option value="i32" ${e.typ==='i32'?'selected':''}>i32</option>
+        <option value="u16" ${e.typ==='u16'?'selected':''}>u16</option>
+        <option value="f32" ${e.typ==='f32'?'selected':''}>float</option></select>
+      <input type="text" class="mono ev" placeholder="要写入的新值">
+      <button class="btn sm" onclick="rmEdit('${e.id}')">移除</button>
+    </div>`).join(''):'<div class="hint">还没有修改项。搜索偏移后点选，或点下方「添加一行」。</div>';
+}
+window.rmEdit=id=>{ editRows=editRows.filter(e=>e.id!=id); renderEdits(); };
+$('#btnAddEdit').onclick=()=>addEditRow();
+$('#bMode').onchange=()=>{ $('#bCustomWrap').style.display=$('#bMode').value==='custom'?'block':'none'; };
+$('#btnPatch').onclick=async()=>{
+  if(!curSave) return toast('请先选择存档',true);
+  const rows=[...$$('#editRows .editrow')];
+  const edits=[];
+  for(const r of rows){
+    const o=r.querySelector('input').value.trim(), v=r.querySelector('.ev').value.trim();
+    if(!o||!v) continue;
+    edits.push({offset:parseInt(o,0),value:v,typ:r.querySelector('.et').value});
+  }
+  if(!edits.length) return toast('请至少填一行完整修改',true);
+  if(!confirm(`即将修改 ${curSave.name}，共 ${edits.length} 处。\n工具会先自动创建 .bak 备份。\n\n确认继续？`)) return;
+  try{
+    const j=await api('/api/save/patch',{path:curSave.path,edits,bMode:$('#bMode').value,bValue:$('#bValue').value});
+    const box=$('#patchResult'); box.style.display='block';
+    box.innerHTML=`<b>写入完成</b>　备份：<code>${esc(j.backup.split(/[\\/]/).pop())}</code><br>
+      A 校验已自动重算：${hex(j.oldA)} → <b>${hex(j.newA)}</b>　B 策略：${esc(j.bMode)}（当前 ${hex(j.B)}）<br>
+      请进游戏读档验证。若提示存档损坏，点「一键还原备份」恢复。`;
+    toast('已写入并备份'); loadSaves();
+  }catch(e){ toast(e.message,true); }
+};
+$('#btnRestore').onclick=async()=>{
+  if(!curSave) return;
+  if(!confirm('用最近一次备份覆盖当前存档？此操作不可撤销。')) return;
+  try{ const j=await api('/api/save/restore',{path:curSave.path});
+       toast('已还原：'+j.restored.split(/[\\/]/).pop()); loadSaves(); }
+  catch(e){ toast(e.message,true); }
+};
+async function hexView(off){
+  if(!curSave) return;
+  $('#hexOff').value=off;
+  try{
+    const j=await api(`/api/save/bytes?path=${encodeURIComponent(curSave.path)}&offset=${off}&length=256`);
+    $('#hexView').innerHTML=j.rows.map(r=>`<div><span class="o">${r.off.toString(16).toUpperCase().padStart(6,'0')}</span>　${esc(r.hex).padEnd(48,' ')}　<span class="a">${esc(r.ascii)}</span></div>`).join('')||'<span class="hint">文件结束</span>';
+  }catch(e){ toast(e.message,true); }
+}
+$('#btnHex').onclick=()=>hexView(parseInt($('#hexOff').value,0)||0);
+$('#btnHexNext').onclick=()=>hexView((parseInt($('#hexOff').value,0)||0)+256);
+
+// ---------- 人物属性 ----------
+let unitRows=[], unitLabels=[], unitSel=null, unitLocked=[];
+
+async function refreshUnitStatus(){
+  try{
+    const s=await api('/api/units/status');
+    unitLabels=s.labels;
+    $('#unitStatus').innerHTML = s.located
+      ? `已识别 <b>${s.count}</b> 个单位（其中 <b>${s.activeCount}</b> 个带属性），内存表基址 <code>${s.baseHex}</code>。数据来自 <code>UnitData.bin</code> / <code>UnitTextData.bin</code>。`
+      : (s.attached ? '已附加游戏，但还没识别人物属性表。点「一键连接并识别人物」。'
+                    : '尚未连接。点右侧按钮，自动识别游戏并列出全部角色的属性。');
+    if(s.located && !unitRows.length) await loadUnits();
+  }catch(e){}
+}
+async function unitConnect(){
+  const btn=$('#btnUnitConnect'); btn.disabled=true; const old=btn.textContent;
+  btn.textContent='识别中…';
+  try{
+    const ps=await api('/api/processes');
+    const g=ps.processes.find(p=>p.game);
+    if(!g) throw new Error('没找到游戏进程，请先启动游戏');
+    await api('/api/attach',{pid:g.pid,name:g.name});
+    $('#unitStatus').textContent='正在解析数据表并在内存中定位（约 2 秒）…';
+    const r=await api('/api/units/prepare',{});
+    toast('识别完成，表基址 '+r.baseHex);
+    await loadUnits(); await refreshUnitStatus(); await refreshStatus();
+  }catch(e){ toast(e.message,true); $('#unitStatus').textContent='连接失败：'+e.message; }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+async function loadUnits(){
+  try{
+    const q=$('#unitSearch').value.trim();
+    const only=$('#unitOnlyActive').checked?'1':'0';
+    const j=await api(`/api/units/list?onlyActive=${only}&q=${encodeURIComponent(q)}`);
+    unitRows=j.units; unitLabels=j.labels; unitLocked=j.locked||[];
+    $('#unitCount').textContent=unitRows.length+' 个单位';
+    renderUnitList();
+    if(unitSel!==null){
+      const u=unitRows.find(x=>x.i===unitSel);
+      if(u) renderUnitEditor(u); else { unitSel=null; $('#unitEditor').style.display='none'; $('#unitEmpty').style.display='block'; }
+    }
+  }catch(e){ toast(e.message,true); }
+}
+function renderUnitList(){
+  $('#unitList').innerHTML = unitRows.length ? unitRows.map(u=>`
+    <div class="unit-item ${unitSel===u.i?'sel':''}" data-i="${u.i}">
+      <span class="nm">${esc(u.name)}</span>
+      <span class="no">${u.number}</span>
+      <span class="mini">${u.attrs?('HP '+u.attrs[0]):'只读'}</span>
+      ${unitLocked.includes(u.i)?'<span class="lk">锁定</span>':''}
+    </div>`).join('') : '<div class="empty">没有匹配的角色。试试清空搜索，或取消「只显示有属性的单位」。</div>';
+  $$('#unitList .unit-item').forEach(el=>el.onclick=()=>selectUnit(+el.dataset.i));
+}
+async function selectUnit(i){
+  unitSel=i;
+  $$('#unitList .unit-item').forEach(el=>el.classList.toggle('sel',+el.dataset.i===i));
+  let u=unitRows.find(x=>x.i===i);
+  if(!u) return;
+  if(!u.attrs){
+    toast('该单位尚未定位到内存',true); return;
+  }
+  renderUnitEditor(u);
+}
+function renderUnitEditor(u){
+  $('#unitEmpty').style.display='none'; $('#unitEditor').style.display='block';
+  $('#unitName').value=u.name; $('#unitNum').textContent=u.number;
+  $('#unitAddr').textContent=u.addrHex||'未定位';
+  $('#unitLock').checked=unitLocked.includes(u.i);
+  $('#fieldRows').innerHTML=unitLabels.map((lab,f)=>`
+    <div class="fieldrow">
+      <span>${esc(lab)}</span>
+      <span class="cur" id="ucur_${f}">${u.attrs?u.attrs[f]:'—'}</span>
+      <input class="mono fi" data-f="${f}" type="text" value="${u.attrs?u.attrs[f]:0}">
+      <span class="orig">${u.orig[f]}</span>
+      <span class="st" id="ust_${f}"></span>
+    </div>`).join('');
+  $$('#fieldRows .fi').forEach(inp=>{
+    inp.onchange=()=>writeField(+inp.dataset.f,inp.value);
+    inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); inp.blur(); } };
+  });
+}
+async function writeField(f,val){
+  if(unitSel===null) return;
+  const v=String(val).trim(); if(!/^\d+$/.test(v)) { toast('请输入 0~65535 的整数',true); return; }
+  try{
+    const r=await api('/api/units/write',{i:unitSel,field:f,value:v});
+    const u=unitRows.find(x=>x.i===unitSel); if(u) u.attrs=r.attrs;
+    $('#ucur_'+f).textContent=r.attrs[f];
+    const st=$('#ust_'+f); st.textContent='已写入'; setTimeout(()=>{if(st)st.textContent='';},2200);
+    renderUnitList();
+  }catch(e){ toast(e.message,true); }
+}
+function fieldValues(){ return $$('#fieldRows .fi').map(x=>x.value); }
+$('#btnUnitWriteAll').onclick=async()=>{
+  if(unitSel===null) return;
+  try{ const r=await api('/api/units/writebatch',{i:unitSel,values:fieldValues()});
+       const u=unitRows.find(x=>x.i===unitSel); if(u)u.attrs=r.attrs;
+       renderUnitEditor(u); toast('全部字段已写入'); renderUnitList(); }
+  catch(e){ toast(e.message,true); }
+};
+$('#btnUnitRestore').onclick=async()=>{
+  if(unitSel===null) return;
+  try{ const r=await api('/api/units/restore',{i:unitSel});
+       const u=unitRows.find(x=>x.i===unitSel); if(u)u.attrs=r.attrs;
+       unitLocked=unitLocked.filter(x=>x!==unitSel);
+       renderUnitEditor(u); renderUnitList(); toast('已还原为数据表初始值'); }
+  catch(e){ toast(e.message,true); }
+};
+$('#btnUnitBoost').onclick=()=>{
+  if(unitSel===null) return;
+  $$('#fieldRows .fi').forEach((inp,f)=>{ if(f<8) inp.value=Math.min(65535,(parseInt(inp.value,10)||0)*2); });
+  toast('前 8 项已 ×2，点「批量写入全部」生效');
+};
+$('#btnUnitRead').onclick=()=>loadUnits();
+$('#btnUnitRefresh').onclick=()=>{ loadUnits(); refreshUnitStatus(); };
+$('#btnUnitConnect').onclick=unitConnect;
+$('#unitLock').onchange=async()=>{
+  if(unitSel===null) return;
+  try{ const r=await api('/api/units/lock',{i:unitSel,on:$('#unitLock').checked});
+       unitLocked=r.locked; renderUnitList(); toast($('#unitLock').checked?'已开启锁定':'已关闭锁定'); }
+  catch(e){ toast(e.message,true); }
+};
+$('#unitName').onchange=async()=>{
+  if(unitSel===null) return;
+  try{ const r=await api('/api/units/rename',{i:unitSel,name:$('#unitName').value});
+       const u=unitRows.find(x=>x.i===unitSel); if(u)u.name=r.name;
+       renderUnitList(); toast('名称已保存'); }
+  catch(e){ toast(e.message,true); }
+};
+let searchTimer=null;
+$('#unitSearch').oninput=()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(loadUnits,250); };
+$('#unitOnlyActive').onchange=loadUnits;
+$('#btnLabelsToggle').onclick=()=>{
+  const p=$('#labelsPanel'); const show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  if(show) $('#labelInputs').innerHTML=unitLabels.map((l,f)=>`<div><label class="f" style="margin:0 0 3px">字段 ${f+1}</label><input type="text" class="li" data-f="${f}" value="${esc(l)}"></div>`).join('');
+};
+$('#btnLabelsSave').onclick=async()=>{
+  try{ const labs=$$('#labelInputs .li').map(x=>x.value);
+       const r=await api('/api/units/labels',{labels:labs}); unitLabels=r.labels;
+       if(unitSel!==null){ const u=unitRows.find(x=>x.i===unitSel); if(u)renderUnitEditor(u); }
+       toast('字段名已保存'); }
+  catch(e){ toast(e.message,true); }
+};
+
+// ---------- 实时角色 ----------
+let liveFieldsData=[], liveAnchor=0;
+async function liveStatus(){
+  try{
+    const s=await api('/api/live/status');
+    $('#liveStat').textContent = s.stage? (s.total+' 个候选'):'尚未扫描';
+    $('#btnLiveFilter').disabled=$('#btnLiveChanged').disabled=!s.stage;
+    if(s.stage) liveResults();
+  }catch(e){}
+}
+async function liveScan(){
+  const v=$('#liveValue').value.trim(); if(!v) return toast('请填入游戏里当前显示的数值',true);
+  const btn=$('#btnLiveScan'); btn.disabled=true; const old=btn.textContent; btn.textContent='扫描中…';
+  try{
+    const j=await api('/api/live/scan',{value:v,types:$('#liveTypes').value.split(',')});
+    toast('扫描完成，'+j.count+' 个候选');
+    $('#liveStat').textContent=j.count+' 个候选';
+    $('#btnLiveFilter').disabled=false; $('#btnLiveChanged').disabled=false;
+    await liveResults();
+  }catch(e){toast(e.message,true);}
+  finally{btn.disabled=false;btn.textContent=old;}
+}
+async function liveFilter(mode){
+  try{
+    const j=await api('/api/live/filter',{value:$('#liveNew').value,mode});
+    toast('筛选完成，剩余 '+j.count+' 个');
+    await liveResults();
+  }catch(e){toast(e.message,true);}
+}
+async function liveResults(){
+  try{
+    const j=await api('/api/live/results?offset=0&count=60');
+    $('#liveStat').textContent=j.total+' 个候选';
+    $('#liveList').innerHTML=j.items.length? j.items.map(r=>`
+      <div class="unit-item" data-a="${r.addr}">
+        <span class="nm mono">${esc(r.addrHex)}</span>
+        <span class="no">${esc(r.typ)}</span>
+        <span class="mini">${esc(fmtVal(r.value))}</span>
+      </div>`).join('') : '<div class="empty">没有候选。点「重置」换个数值或类型重试。</div>';
+    $$('#liveList .unit-item').forEach(el=>el.onclick=()=>livePick(+el.dataset.a));
+  }catch(e){toast(e.message,true);}
+}
+async function livePick(addr){
+  try{
+    const j=await api('/api/live/fields?addr='+addr+'&span=256');
+    liveAnchor=addr; liveFieldsData=j.fields;
+    $('#liveEmpty').style.display='none'; $('#liveEditor').style.display='block';
+    $('#liveAnchorAddr').textContent=j.anchorHex;
+    const nm=$('#liveAnchorName');
+    nm.textContent = j.matchCount
+      ? '锚点附近碰巧有 '+j.matchCount+' 个界面数值（'+j.matched.join('、')+'）· 不代表已定位角色'
+      : '锚点附近没有匹配到界面数值，请回到第 ② 步继续收敛候选地址';
+    nm.style.color = j.matchCount? 'var(--ink-2)':'var(--warn)';
+    liveRenderFields();
+  }catch(e){toast(e.message,true);}
+}
+function liveRenderFields(){
+  const only=$('#liveOnlyNamed').checked;
+  const rows=liveFieldsData.filter(f=>!only||f.label);
+  $('#liveFields').innerHTML=rows.length? rows.map((f,i)=>`
+    <div class="fieldrow" data-i="${i}">
+      <span>${f.label?'<b>'+esc(f.label)+'</b>':'偏移 '+f.off}
+        <select class="lt" style="width:72px;padding:2px 4px;font-size:11px;margin-left:5px">
+          <option value="u32">u32</option><option value="u16">u16</option><option value="f32">f32</option>
+        </select></span>
+      <span class="mono" style="font-size:11px">${esc(f.addrHex)}</span>
+      <span class="cur lv">${f.u32}</span>
+      <input class="mono lfi" value="${f.u32}">
+      <button class="btn sm lfw">写入</button>
+    </div>`).join('') : '<div class="empty">没有数值碰巧相同的字段。取消「只显示数值匹配的字段」查看周边全部数值。</div>';
+  $$('#liveFields .fieldrow').forEach((row,i)=>{
+    const f=rows[i];
+    const sel=row.querySelector('.lt'),cur=row.querySelector('.lv'),inp=row.querySelector('.lfi');
+    const sync=()=>{const v=sel.value==='u16'?f.u16:(sel.value==='f32'?(f.f32===null?0:f.f32):f.u32);cur.textContent=v;inp.value=v;};
+    sel.onchange=sync;
+    row.querySelector('.lfw').onclick=()=>liveWrite(f.addr,sel.value,inp.value);
+    inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();liveWrite(f.addr,sel.value,inp.value);}};
+    sync();
+  });
+}
+async function liveWrite(a,typ,v){
+  try{ await api('/api/live/write',{addr:a,typ,value:v}); toast('已写入 '+hex(a)); await livePick(liveAnchor); }
+  catch(e){toast(e.message,true);}
+}
+$('#btnLiveScan').onclick=liveScan;
+$('#btnLiveFilter').onclick=()=>liveFilter('equal');
+$('#btnLiveChanged').onclick=()=>liveFilter('changed');
+$('#btnLiveReset').onclick=async()=>{
+  await api('/api/live/reset',{});
+  liveFieldsData=[];liveAnchor=0;
+  $('#liveList').innerHTML='';$('#liveStat').textContent='尚未扫描';
+  $('#liveEditor').style.display='none';$('#liveEmpty').style.display='block';
+  $('#btnLiveFilter').disabled=true;$('#btnLiveChanged').disabled=true;
+};
+$('#liveOnlyNamed').onchange=liveRenderFields;
+
+// ---------- init ----------
+loadProcs(); refreshStatus(); loadResults(); loadTable(); refreshUnitStatus(); liveStatus();
+setInterval(refreshStatus,4000);
+</script>
+</body>
+</html>

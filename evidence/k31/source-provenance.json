@@ -1,0 +1,69 @@
+{
+  "recovered_from": "WorkBuddy file history",
+  "recovered_on": "2026-11-11",
+  "note": "The original source tree was deleted during cleanup. These backups were copied, sanitized only where needed, rebuilt, and retested.",
+  "files": [
+    {
+      "path": "app.py",
+      "source_file_history": "2eca2f35f61539d9@v5",
+      "original_size": 30413,
+      "original_sha256": "033808ddbb5be22887ad54b82072a94fd297bc2858a27d91f90b7886a3b2a295",
+      "source_backup_mtime_local": "2026-11-08T18:40:43+08:00"
+    },
+    {
+      "path": "game_memory.py",
+      "source_file_history": "d48e174baf755b4e@v2",
+      "original_size": 15079,
+      "original_sha256": "32cf7c27d8e19e54ec008f7ff2668a3eedc5c70d3d30e21280b32d8e16009998",
+      "source_backup_mtime_local": "2026-11-08T18:28:13+08:00"
+    },
+    {
+      "path": "build.py",
+      "source_file_history": "532f72151d45684a@v3",
+      "original_size": 3817,
+      "original_sha256": "4b37179f402b2b82ccf895c6bf17b3a408a01ff12b8d03debd06a77d590c55cf",
+      "source_backup_mtime_local": "2026-11-08T18:40:43+08:00"
+    },
+    {
+      "path": "tests/test_core.py",
+      "source_file_history": "e357bb031b444713@v2",
+      "original_size": 2687,
+      "original_sha256": "0f86adfd89ce5d2b31e7a8040cbdd42ffb3d3c740bf2116ac84d813fb57cfea7",
+      "source_backup_mtime_local": "2026-11-08T18:30:26+08:00"
+    },
+    {
+      "path": "tests/live_write_test.py",
+      "source_file_history": "ad5701a945923d27@v2",
+      "original_size": 1143,
+      "original_sha256": "f47af3a6c7aae477013a0eee6f9daad08a034c518e1b17d4c95f504107061ba0",
+      "source_backup_mtime_local": "2026-11-08T18:33:46+08:00"
+    },
+    {
+      "path": "tests/ui_smoke_test.py",
+      "source_file_history": "4a488ee9f6546874@v3",
+      "original_size": 2254,
+      "original_sha256": "05736045428c50f80326ea22a4e6b80b5c61eecf62e8e6e0f4114bf2c46b330a",
+      "source_backup_mtime_local": "2026-11-08T18:40:43+08:00"
+    },
+    {
+      "path": "tools/recon.py",
+      "source_file_history": "fc341995a0e019b5@v2",
+      "original_size": 12681,
+      "original_sha256": "2273cb84e265048da8d6693caaf860beeeec379a5ab9d9c4af2677366325b07c",
+      "source_backup_mtime_local": "2026-11-08T18:28:13+08:00"
+    }
+  ],
+  "release_build": {
+    "file": "k31-trainer-v1.1.exe",
+    "size": 36407921,
+    "sha256": "fc56b3ca386e4823b0fe32ec11b3a957611ac3f094e592bdfaeea666380573da",
+    "built_at_local": "2026-11-11T22:45:36+08:00",
+    "build_environment": "copy built from C:/Users/Public/utawa-build to avoid embedding the operator profile path"
+  },
+  "superseded_v1_0": {
+    "filename": "传颂之物-虚伪的假面-人物修改器.exe",
+    "size": 36409143,
+    "sha256": "90e94d8801efd72382d63db23fc8fafb1c5e86bd93c9e4ba3f40fa5bccf11273",
+    "note": "not redistributed"
+  }
+}

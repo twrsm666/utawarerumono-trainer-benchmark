@@ -1,0 +1,28 @@
+# Build and runtime byproducts
+__pycache__/
+*.py[cod]
+artifacts/**/build/
+artifacts/**/dist/
+artifacts/k31/trainer-source/preview.png
+release-assets/
+*.spec
+*.log
+
+# Sensitive game/user material: never commit
+*.DAT
+*.dat
+*.blob
+*.exe
+*.dll
+*.sav
+saves/
+backups/
+save_backup/
+_analysis/
+
+# Local environments
+.venv/
+venv/
+node_modules/
+.env
+.env.*

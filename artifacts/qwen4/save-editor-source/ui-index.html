@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>传颂之物 虚伪的假面 · 人物修改器</title>
+<style>
+:root{
+  --bg:#0f1218;--panel:#181d27;--panel2:#1f2634;--line:#2b3547;
+  --txt:#e7ecf5;--sub:#93a0b4;--acc:#d4a94e;--acc2:#5b8cff;--ok:#43c97d;--warn:#e0635c;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;flex-direction:column}
+header{padding:14px 20px;background:linear-gradient(180deg,#1a2130,#141924);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;letter-spacing:1px}
+header h1 .sub{color:var(--acc);font-weight:600}
+.badge{font-size:12px;color:var(--sub)}
+main{flex:1;display:flex;min-height:0}
+#sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+#content{flex:1;overflow:auto;padding:20px 24px;min-width:0}
+.topbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+select,input[type=number]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:7px 10px;border-radius:8px;font-size:14px;outline:none}
+select:focus,input:focus{border-color:var(--acc2)}
+input[type=number]{width:110px}
+button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;transition:.15s}
+button:hover{border-color:var(--acc2);background:#242e40}
+button.primary{background:var(--acc);border-color:var(--acc);color:#1a1405;font-weight:700}
+button.primary:hover{filter:brightness(1.1)}
+button.danger{border-color:var(--warn);color:var(--warn)}
+button.small{padding:4px 9px;font-size:12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.savemeta{font-size:12px;color:var(--sub);margin-top:6px}
+#charlist{overflow:auto;flex:1;padding:8px}
+.charitem{padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px;border:1px solid transparent;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.charitem:hover{background:var(--panel2)}
+.charitem.sel{background:#24304a;border-color:var(--acc2)}
+.charitem .nm{font-weight:600;font-size:14px}
+.charitem .meta{font-size:11px;color:var(--sub);margin-top:2px}
+.charitem .lv{font-size:12px;color:var(--acc);white-space:nowrap}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}
+.dot.on{background:var(--ok)}.dot.off{background:#5a6577}
+.section{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+.section h2{margin:0 0 4px;font-size:16px}
+.section .desc{color:var(--sub);font-size:12px;margin-bottom:14px}
+.charhead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.charhead .big{font-size:24px;font-weight:700}
+.charhead .tag{font-size:12px;padding:3px 9px;border-radius:20px;background:var(--panel2);color:var(--sub);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.field{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:6px}
+.field label .off{color:#5a6577;font-size:10px;margin-left:4px}
+.field input{width:100%}
+.field.changed{border-color:var(--acc)}
+.field.changed label{color:var(--acc)}
+h3.grp{font-size:13px;color:var(--acc);margin:18px 0 10px;letter-spacing:1px}
+details{margin-top:16px}
+summary{cursor:pointer;color:var(--sub);font-size:13px;user-select:none}
+.moneyrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.moneyrow .val{font-size:20px;font-weight:700;color:var(--acc)}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#242e40;border:1px solid var(--line);padding:12px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;max-width:80%;z-index:50}
+#toast.show{opacity:1}
+#toast.ok{border-color:var(--ok)}#toast.err{border-color:var(--warn)}
+.unsaved{color:var(--acc);font-size:12px;font-weight:600}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.hint{font-size:12px;color:var(--sub);line-height:1.6}
+.empty{color:var(--sub);padding:40px;text-align:center}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2b3547;border-radius:5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>传颂之物 <span class="sub">虚伪的假面</span> · 人物修改器</h1>
+  <span class="badge">单机离线 · 存档编辑 · 自动备份</span>
+  <div style="flex:1"></div>
+  <span id="unsaved" class="unsaved"></span>
+</header>
+<main>
+  <div id="sidebar">
+    <div style="padding:12px">
+      <div class="topbar">
+        <select id="savesel" style="flex:1"></select>
+        <button class="small" id="refreshBtn" title="刷新">⟳</button>
+      </div>
+      <div class="savemeta" id="savemeta"></div>
+    </div>
+    <div id="charlist"></div>
+  </div>
+  <div id="content">
+    <div class="section">
+      <h2>金钱</h2>
+      <div class="desc">当前存档所持金钱。修改后点击下方「保存修改」写入。</div>
+      <div class="moneyrow">
+        <span class="val" id="moneyval">-</span>
+        <input type="number" id="moneyinput" min="0" max="2147483647">
+        <button class="small" data-money="10000">+1万</button>
+        <button class="small" data-money="100000">+10万</button>
+        <button class="small" data-money="9999999">设为 999万</button>
+      </div>
+    </div>
+    <div id="charpage"></div>
+    <div class="section">
+      <div class="toolbar">
+        <button class="primary" id="saveBtn">💾 保存修改（自动备份）</button>
+        <button id="discardBtn">放弃修改</button>
+        <button id="restoreBtn">↩ 还原备份…</button>
+        <span class="hint" id="savehint"></span>
+      </div>
+      <div class="hint" style="margin-top:12px">
+        流程：选择存档 → 修改人物属性 / 金钱 → 「保存修改」→ 进入游戏<strong>读取该存档</strong>即生效。<br>
+        每次保存前自动备份原存档；「还原备份」可一键回滚。战斗类数值读档后生效。建议先备份再大胆改。
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+let FIELDS=[],state={slot:null,save:null,sel:0,pending:{money:null,chars:{}}};
+const $=s=>document.querySelector(s);
+function toast(msg,cls){const t=$('#toast');t.textContent=msg;t.className='show '+(cls||'');clearTimeout(t._h);t._h=setTimeout(()=>t.className='',3200);}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+async function api(url,opt){const r=await fetch(url,opt);const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);return j;}
+
+function hasPending(){return state.pending.money!==null||Object.keys(state.pending.chars).length>0;}
+function markUnsaved(){$('#unsaved').textContent=hasPending()?'● 有未保存修改':'';$('#saveBtn').disabled=!hasPending();}
+function pendVal(idx,key,orig){const c=state.pending.chars[idx];return (c&&c[key]!==undefined)?c[key]:orig;}
+function setPend(idx,key,val){if(!state.pending.chars[idx])state.pending.chars[idx]={};state.pending.chars[idx][key]=val;markUnsaved();}
+
+async function loadSaves(){
+  const {saves,saveDir}=await api('/api/saves');
+  const sel=$('#savesel');sel.innerHTML='';
+  for(const s of saves){
+    const o=document.createElement('option');o.value=s.slot;
+    o.textContent=`存档 ${String(s.slot).padStart(2,'0')} · ${s.desc||''}`;
+    sel.appendChild(o);
+  }
+  if(saves.length){const pick=state.slot&&saves.some(s=>s.slot===state.slot)?state.slot:saves[saves.length-1].slot;sel.value=pick;await loadSave(pick);}
+  $('#savemeta').textContent='目录: '+saveDir;
+}
+async function loadSave(slot){
+  state.slot=slot;state.pending={money:null,chars:{}};
+  const d=await api('/api/save/'+slot);
+  state.save=d;FIELDS=d.fields;state.sel=0;
+  $('#moneyval').textContent=d.money.toLocaleString();
+  $('#moneyinput').value=d.money;
+  renderCharList();renderCharPage();markUnsaved();
+  $('#savehint').textContent=d.valid?'校验正常':'⚠ 原存档校验异常';
+}
+function renderCharList(){
+  const box=$('#charlist');box.innerHTML='';
+  state.save.chars.forEach((c,i)=>{
+    const div=document.createElement('div');
+    div.className='charitem'+(i===state.sel?' sel':'');
+    const lv=pendVal(c.index,'level',c.fields.level);
+    div.innerHTML=`<div><div class="nm"><span class="dot ${c.active?'on':'off'}"></span>${esc(c.name)}</div>
+      <div class="meta">${c.active?'出战':'后备'} · HP ${pendVal(c.index,'hp',c.fields.hp)}</div></div>
+      <div class="lv">Lv ${lv}</div>`;
+    div.onclick=()=>{state.sel=i;renderCharList();renderCharPage();};
+    box.appendChild(div);
+  });
+}
+function fieldHTML(c,f){
+  const v=pendVal(c.index,f.key,c.fields[f.key]);
+  const changed=(state.pending.chars[c.index]&&state.pending.chars[c.index][f.key]!==undefined);
+  return `<div class="field${changed?' changed':''}">
+    <label>${esc(f.label)}<span class="off">+${f.off.toString(16).toUpperCase()}</span></label>
+    <input type="number" data-idx="${c.index}" data-key="${f.key}" min="${f.min}" max="${f.max}" value="${v}">
+  </div>`;
+}
+function renderCharPage(){
+  const c=state.save.chars[state.sel];const box=$('#charpage');
+  if(!c){box.innerHTML='<div class="section empty">该存档没有人物数据</div>';return;}
+  const core=FIELDS.filter(f=>['level','exp','hp','sp'].includes(f.key));
+  const combat=FIELDS.filter(f=>['atk','def','hit','avoid','mov','jump'].includes(f.key));
+  const adv=FIELDS.filter(f=>f.conf==='adv');
+  box.innerHTML=`<div class="section">
+    <div class="charhead">
+      <span class="big">${esc(c.name)}</span>
+      <span class="tag">${c.active?'出战中':'后备'}</span>
+      <span class="tag">单位ID ${c.unitId}</span>
+      <span class="tag">槽位 ${c.index}</span>
+      <div style="flex:1"></div>
+      <div class="quick">
+        <button class="small" data-quick="max">一键满级满血</button>
+        <button class="small" data-quick="hp">HP/SP 拉满</button>
+        <button class="small" data-quick="atk">攻防 999</button>
+      </div>
+    </div>
+    <h3 class="grp">基础</h3><div class="grid">${core.map(f=>fieldHTML(c,f)).join('')}</div>
+    <h3 class="grp">战斗属性</h3><div class="grid">${combat.map(f=>fieldHTML(c,f)).join('')}</div>
+    <details><summary>进阶字段（未完全标注，按偏移显示，可编辑）</summary>
+      <div class="grid" style="margin-top:12px">${adv.map(f=>fieldHTML(c,f)).join('')}</div>
+    </details>
+  </div>`;
+  box.querySelectorAll('input[data-key]').forEach(inp=>{
+    inp.oninput=()=>{setPend(+inp.dataset.idx,inp.dataset.key,inp.value===''?0:+inp.value);
+      inp.closest('.field').classList.add('changed');renderCharList();};
+  });
+  box.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>quick(c,b.dataset.quick));
+}
+function quick(c,kind){
+  const set=(k,v)=>setPend(c.index,k,v);
+  if(kind==='max'){set('level',99);set('hp',9999);set('sp',9999);set('atk',999);set('def',999);}
+  if(kind==='hp'){set('hp',9999);set('sp',9999);}
+  if(kind==='atk'){set('atk',999);set('def',999);}
+  renderCharPage();renderCharList();
+}
+$('#moneyinput').oninput=()=>{state.pending.money=$('#moneyinput').value===''?0:+$('#moneyinput').value;markUnsaved();};
+document.querySelectorAll('[data-money]').forEach(b=>b.onclick=()=>{
+  const v=+b.dataset.money;const cur=state.pending.money!==null?state.pending.money:state.save.money;
+  const nv=b.textContent.startsWith('设为')?v:Math.min(2147483647,cur+v);
+  state.pending.money=nv;$('#moneyinput').value=nv;markUnsaved();
+});
+$('#saveBtn').onclick=async()=>{
+  try{
+    const body={money:state.pending.money,chars:state.pending.chars};
+    const r=await api('/api/save/'+state.slot,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    toast('已保存并备份（'+r.backup+'）。进游戏读取存档 '+state.slot+' 生效。','ok');
+    await loadSave(state.slot);
+  }catch(e){toast('保存失败: '+e.message,'err');}
+};
+$('#discardBtn').onclick=()=>{state.pending={money:null,chars:{}};$('#moneyinput').value=state.save.money;renderCharList();renderCharPage();markUnsaved();};
+$('#restoreBtn').onclick=async()=>{
+  try{
+    const {backups}=await api('/api/backups/'+state.slot);
+    if(!backups.length){toast('该存档暂无备份','err');return;}
+    const pick=prompt('输入要还原的备份序号（1=最新）：\n'+backups.slice(0,15).map((f,i)=>(i+1)+'. '+f).join('\n'),'1');
+    if(!pick)return;const idx=+pick-1;if(!backups[idx])return;
+    if(!confirm('还原将覆盖当前存档 '+state.slot+'（会先再备份一次）。继续？'))return;
+    await api('/api/restore',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({file:backups[idx]})});
+    toast('已还原','ok');await loadSave(state.slot);
+  }catch(e){toast('还原失败: '+e.message,'err');}
+};
+$('#savesel').onchange=()=>{if(hasPending()&&!confirm('有未保存修改，切换存档将丢弃。继续？')){$('#savesel').value=state.slot;return;}loadSave(+$('#savesel').value);};
+$('#refreshBtn').onclick=()=>loadSaves();
+loadSaves().catch(e=>toast('加载失败: '+e.message,'err'));
+</script>
+</body>
+</html>

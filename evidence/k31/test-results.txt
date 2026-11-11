@@ -1,0 +1,22 @@
+Acceptance run: 2026-11-11T22:41:24+08:00
+
+[structure] PASS
+$ python -m unittest discover -s tests -p test_core.py -v
+test_live_attach_and_read (test_core.LiveReadTests.test_live_attach_and_read) ... ok
+test_expected_core_roster (test_core.StructureTests.test_expected_core_roster) ... ok
+test_field_order_is_complete (test_core.StructureTests.test_field_order_is_complete) ... ok
+test_fields_stay_inside_record (test_core.StructureTests.test_fields_stay_inside_record) ... ok
+test_parse_character (test_core.StructureTests.test_parse_character) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.020s
+
+OK
+
+[ui] PASS
+$ python tests/ui_smoke_test.py
+UI_TEST_OK pages=18 fields=13 preview=<USER_HOME>\WorkBuddy\2026-11-08-18-03-40\benchmark-repo\artifacts\k31\trainer-source\preview.png
+
+[live-write-restore] PASS
+$ python tests/live_write_test.py
+LIVE_WRITE_OK name=哈克 original_bp=31 test_bp=32 restored_bp=31

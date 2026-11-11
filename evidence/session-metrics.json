@@ -1,0 +1,72 @@
+{
+  "generated_for": "single-task agent benchmark, Utawarerumono trainer",
+  "timezone": "中国标准时间",
+  "hy4": {
+    "session_label": "Hy4",
+    "platform": "WorkBuddy",
+    "configured_model_label_at_export": "kimi-k3.1-pro",
+    "attribution_note": "The session title is Hy4; the model value is the session metadata available at export. It is not independently verified.",
+    "record_count": 547,
+    "start": "2026-11-08T16:38:36.630+08:00",
+    "end": "2026-11-08T18:00:35.113+08:00",
+    "human_turn_count": 4,
+    "assistant_message_count": 51,
+    "tool_call_count": 182,
+    "tool_calls": {
+      "Bash": 71,
+      "Edit": 71,
+      "TaskUpdate": 14,
+      "Write": 8,
+      "TaskCreate": 7,
+      "Read": 4,
+      "DeferExecuteTool": 3,
+      "present_files": 3,
+      "ToolSearch": 1
+    },
+    "wall_clock_minutes": 81.97
+  },
+  "k31_initial_task_window": {
+    "session_label": "K3.1",
+    "platform": "WorkBuddy",
+    "model_label_current_after_switch": "deepseek-v4.1-flash",
+    "attribution_note": "The operator attributes the initial build to K3.1 and the final small fix to DeepSeek. The live session metadata reports deepseek-v4.1-flash after fallback; split attribution is not independently verifiable.",
+    "cutoff_local": "2026-11-08T18:40:42+08:00",
+    "record_count": 353,
+    "start": "2026-11-08T18:03:40.710+08:00",
+    "end": "2026-11-08T18:40:05.709+08:00",
+    "human_turn_count": 3,
+    "assistant_message_count": 19,
+    "tool_call_count": 117,
+    "tool_calls": {
+      "Bash": 50,
+      "Edit": 27,
+      "Write": 8,
+      "Read": 7,
+      "ViewImage": 6,
+      "TaskUpdate": 5,
+      "PowerShell": 4,
+      "TaskCreate": 3,
+      "TaskOutput": 3,
+      "WebSearch": 1,
+      "WebFetch": 1,
+      "Grep": 1,
+      "present_files": 1
+    },
+    "wall_clock_minutes": 36.42
+  },
+  "qwen4": {
+    "session_label": "Qwen4",
+    "platform": "Qoder",
+    "artifact_id": "dd671415",
+    "attribution_note": "Model name is the operator-provided session label; Qoder chat transcript was not available to this audit.",
+    "artifact_first_write": "2026-11-11T20:33:07+08:00",
+    "artifact_last_write": "2026-11-11T21:44:42+08:00",
+    "artifact_window_minutes": 71.57,
+    "raw_product_file_count": 9,
+    "excluded_sensitive_or_game_data_file_count": 90
+  },
+  "withheld_raw_logs": {
+    "reason": "Raw agent logs contain local usernames, absolute paths, environment details, and unrelated personal context.",
+    "published_equivalent": "Counts, timestamps, final self-correction excerpt, source snapshots, and runtime comparison evidence."
+  }
+}
